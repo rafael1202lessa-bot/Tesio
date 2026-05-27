@@ -60,14 +60,14 @@ def aplicar_moldura_e_selo(username, titulo, itens_usuario=None, seguidores=0):
             
     return selo, estilo_moldura
 
-# --- FUNÇÕES DE SIMULAÇÃO DE IA ---
+# --- FUNÇÕES DE SIMULAÇÃO DO SILVER IA ---
 def responder_ia(pergunta):
     respostas_prontas = [
-        "Com certeza, Rafael! Como desenvolvedor do Silver Tok, você pode tudo! O que mais quer codar hoje?",
-        "Essa é uma excelente pergunta. No ecossistema do Silver Tok v2, podemos estruturar isso usando Python e Streamlit.",
-        "Analisando os dados em tempo real... Pronto! Recomendo postar vídeos curtos com legendas chamativas para alcançar os 1.000 seguidores mais rápido!",
-        "Dica da IA: O Chat EXV acabou de ser implementado com sucesso. Monitore os servidores para garantir estabilidade.",
-        "Estou processando sua solicitação. Como assistente inteligente, posso te ajudar a criar códigos, responder curiosidades ou planejar atualizações."
+        "Com certeza, Rafael! Como seu assistente Silver, estou aqui para ajudar você a gerenciar o Silver Tok. O que mais quer codar hoje?",
+        "Essa é uma excelente pergunta. No ecossistema do Silver Tok v2, eu, Silver, recomendo estruturar isso usando Python e Streamlit.",
+        "Analisando os dados da plataforma... Pronto! O Silver encontrou a solução: tente postar vídeos curtos com legendas chamativas para alcançar os 1.000 seguidores mais rápido!",
+        "Dica do Silver: O Chat EXV acabou de ser implementado com sucesso. Monitore os servidores para garantir estabilidade.",
+        "Olá, eu sou o Silver! Estou processando sua solicitação. Posso te ajudar a criar códigos, responder curiosidades ou planejar novas atualizações."
     ]
     return random.choice(respostas_prontas)
 
@@ -93,7 +93,7 @@ def criar_conta(username, password, nickname, codigo):
             "foto_perfil": "https://img.icons8.com/colors/150/test-account.png",
             "bio": "Olá! Estou usando o Silver Tok.",
             "itens_exclusivos": [],
-            "lista_amigos": []  # Armazena os usernames dos amigos
+            "lista_amigos": []
         }
         supabase.table("perfis_usuarios").insert(novo_usuario).execute()
         return "Sucesso"
@@ -179,7 +179,7 @@ if st.sidebar.button("Sair da Conta"):
     st.rerun()
 
 # --- MENU PRINCIPAL ---
-abas = ["📱 Feed", "🎥 Gravar/Postar", "💬 Chat EXV", "🧠 IA Assistente", "🛒 Loja do Site", "👤 Meu Perfil"]
+abas = ["📱 Feed", "🎥 Gravar/Postar", "💬 Chat EXV", "🧠 Silver IA", "🛒 Loja do Site", "👤 Meu Perfil"]
 if st.session_state.perfil_visitado:
     abas.append("👀 Ver Perfil")
 if user_atual.get('username') == "rafael_oficial":
@@ -277,7 +277,7 @@ elif aba_ativa == "🎥 Gravar/Postar":
                 st.success("Publicado no Feed!")
             except Exception as e: st.error(f"Erro ao publicar: {str(e)}")
 
-# --- 3. ABA CHAT EXV (SISTEMA COMPLETO DE COMUNICAÇÃO e AMIGOS) ---
+# --- 3. ABA CHAT EXV ---
 elif aba_ativa == "💬 Chat EXV":
     st.title("💬 Chat EXV")
     
@@ -285,7 +285,6 @@ elif aba_ativa == "💬 Chat EXV":
         "🔒 Chat Privado", "👥 Chat em Grupo", "📣 Com Seguidores", "🤝 Lista & Add Amigos"
     ])
     
-    # Pegar todos os usuários para listagem rápida nos seletores
     try:
         todos_users_req = supabase.table("perfis_usuarios").select("username").execute()
         lista_geral_users = [u['username'] for u in todos_users_req.data if u['username'] != user_atual.get('username')]
@@ -309,16 +308,12 @@ elif aba_ativa == "💬 Chat EXV":
 
     with sub_aba_seguidores:
         st.subheader("📣 Conversa com Seguidores")
-        st.caption("Apenas usuários que fazem parte dos seus seguidores cadastrados escutam aqui.")
         msg_seg = st.text_input("Escreva um comunicado/chat para quem te segue:", key="txt_seg")
         if st.button("Transmitir via Chat EXV", key="btn_seg_chat"):
             st.success("Transmitido com sucesso para a sua base de seguidores ativos!")
 
     with sub_aba_amigos:
         st.subheader("🤝 Gerenciador de Amizades")
-        
-        # Bloco para adicionar amigo
-        st.write("**Adicionar Novo Amigo**")
         amigo_alvo = st.text_input("Digite o @username exato do seu amigo:", key="add_amigo_input").strip()
         if st.button("➕ Enviar Pedido / Adicionar", use_container_width=True):
             if amigo_alvo == user_atual.get('username'):
@@ -350,23 +345,23 @@ elif aba_ativa == "💬 Chat EXV":
                     st.rerun()
         else: st.info("Sua lista de amigos está vazia no momento.")
 
-# --- 4. ABA IA ASSISTENTE ---
-elif aba_ativa == "🧠 IA Assistente":
-    st.title("🧠 Inteligência Artificial Silver Tok")
-    st.write("Faça perguntas, peça ideias de posts ou pesquise ferramentas comigo!")
+# --- 4. ABA SILVER IA ---
+elif aba_ativa == "🧠 Silver IA":
+    st.title("🧠 Silver IA")
+    st.write("Olá! Eu sou o **Silver**, seu assistente oficial do Silver Tok v2. Faça perguntas, peça ideias de posts ou pesquise ferramentas comigo!")
     
     prompt_usuario = st.text_input("O que deseja saber ou pesquisar?", placeholder="Ex: Me dê ideias de vídeos para o meu feed")
-    if st.button("Perguntar à IA", use_container_width=True):
+    if st.button("Perguntar ao Silver", use_container_width=True):
         if prompt_usuario:
             resposta = responder_ia(prompt_usuario)
             st.session_state.historico_ia.insert(0, {"pergunta": prompt_usuario, "resposta": resposta})
             
     if st.session_state.historico_ia:
         st.write("---")
-        st.subheader("💬 Histórico de Conversa")
+        st.subheader("💬 Histórico de Conversas")
         for chat in st.session_state.historico_ia:
             st.info(f"❓ **Você:** {chat['pergunta']}")
-            st.success(f"🤖 **IA Assistente:** {chat['resposta']}")
+            st.success(f"🤖 **Silver:** {chat['resposta']}")
 
 # --- 5. ABA LOJA DO SITE ---
 elif aba_ativa == "🛒 Loja do Site":
@@ -411,7 +406,7 @@ elif aba_ativa == "🛒 Loja do Site":
                         else: st.error("❌ Saldo insuficiente!")
             st.write("---")
 
-# --- 6. ABA MEU PERFIL (COM LISTA DE AMIGOS ADICIONADA) ---
+# --- 6. ABA MEU PERFIL ---
 elif aba_ativa == "👤 Meu Perfil":
     meus_itens_perfil = user_atual.get('itens_exclusivos', [])
     if not isinstance(meus_itens_perfil, list): meus_itens_perfil = []
@@ -436,7 +431,6 @@ elif aba_ativa == "👤 Meu Perfil":
     
     st.write(f"📝 **Bio:** {user_atual.get('bio', 'Disponível')}")
     
-    # EXIBIÇÃO PÚBLICA DE AMIGOS NO PERFIL
     st.write("---")
     st.subheader("👥 Meus Amigos (Visível para Seguidores)")
     lista_amigos_perfil = user_atual.get('lista_amigos', [])
@@ -498,7 +492,7 @@ elif aba_ativa == "👤 Meu Perfil":
                 st.rerun()
             except Exception as e: st.error(f"Erro ao salvar: {str(e)}")
 
-# --- 7. ABA VISITAR PERFIL ALHEIO (COM REQUISITO DE VER AMIGOS) ---
+# --- 7. ABA VISITAR PERFIL ALHEIO ---
 elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
     alvo = st.session_state.perfil_visitado
     try:
@@ -520,7 +514,6 @@ elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
             
             st.write(f"📝 {p.get('bio', '')}")
             
-            # SEGUIDORES PODEM VER A LISTA DE AMIGOS DELE AQUI:
             st.write("---")
             st.subheader("👥 Lista de Amigos deste Perfil")
             amigos_alvo = p.get('lista_amigos', [])
@@ -534,7 +527,7 @@ elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
                 st.rerun()
     except: st.error("Erro ao carregar o perfil visitado.")
 
-# --- 8. PAINEL DEV ---
+# --- 8. PAINEL DEV (RECUPERADO COMPLETO) ---
 elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_oficial":
     st.header("Painel Secreto do Desenvolvedor 👑")
     try:
@@ -557,4 +550,56 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
             qtd_dinheiro = st.number_input("Dinheiro ($)", min_value=0, value=500)
             if st.button("Definir", key="btn_money"):
                 try: supabase.table("perfis_usuarios").update({"dinheiro": qtd_dinheiro}).eq("username", usuario_alvo).execute(); st.rerun()
+                except: pass
+        with col3:
+            st.subheader("🎖️ Cargos")
+            novo_titulo = st.selectbox("Cargo:", ["👑 Desenvolvedor", "⚔️ Vice-Dev", "📢 Divulgadora", "🧪 Tester", "🏅 best friends of the dev", "Usuário"])
+            if st.button("Atualizar", key="btn_cargo"):
+                try: supabase.table("perfis_usuarios").update({"titulo": novo_titulo}).eq("username", usuario_alvo).execute(); st.rerun()
+                except: pass
+        with col4:
+            st.subheader("🔨 Moderação")
+            st.write("<br>", unsafe_allow_html=True)
+            if st.button("🚫 Banir Usuário", key="btn_banir", use_container_width=True):
+                try: supabase.table("perfis_usuarios").update({"titulo": "❌ BANIDO"}).eq("username", usuario_alvo).execute(); st.success(f"@{usuario_alvo} banido!"); st.rerun()
+                except Exception as e: st.error(f"Erro: {str(e)}")
+
+        # --- SEÇÃO DO GERENCIADOR DE INVENTÁRIO (RECUPERADO) ---
+        st.write("---")
+        st.subheader("🎒 Gerenciador de Inventário (God Mode)")
+        item_para_dar = st.text_input("Nome do Item para dar ao usuário:", placeholder="Ex: 🖼️ Moldura de Fogo 🔥")
+        if st.button("🎁 Entregar Item para o Usuário", use_container_width=True):
+            if not item_para_dar: st.warning("Digite o nome de um item antes de enviar!")
+            else:
+                try:
+                    busca_user = supabase.table("perfis_usuarios").select("itens_exclusivos").eq("username", usuario_alvo).execute()
+                    if busca_user.data:
+                        inventario_atual = busca_user.data[0].get('itens_exclusivos', [])
+                        if not isinstance(inventario_atual, list): inventario_atual = []
+                        inventario_atual.append(item_para_dar)
+                        supabase.table("perfis_usuarios").update({"itens_exclusivos": inventario_atual}).eq("username", usuario_alvo).execute()
+                        st.success(f"🎉 '{item_para_dar}' injetado no inventário de @{usuario_alvo}!"); st.rerun()
+                except Exception as e: st.error(f"Erro: {str(e)}")
+
+        # --- SEÇÃO DE AÇÕES GLOBAIS (RECUPERADO) ---
+        st.write("---")
+        st.subheader("⚙️ Ações Globais")
+        col_glob1, col_glob2 = st.columns(2)
+        with col_glob1:
+            valor_bonus = st.number_input("Valor do Bônus Global:", min_value=1, value=100)
+            if st.button("💰 Dar Bônus para Todos", use_container_width=True):
+                try:
+                    todos = supabase.table("perfis_usuarios").select("username, dinheiro").execute()
+                    for u in todos.data:
+                        novo_saldo = u.get('dinheiro', 0) + valor_bonus
+                        supabase.table("perfis_usuarios").update({"dinheiro": novo_saldo}).eq("username", u['username']).execute()
+                    st.success("Bônus global enviado!"); st.rerun()
+                except: pass
+        with col_glob2:
+            st.write("<br>", unsafe_allow_html=True)
+            if st.button("🧹 APAGAR TODOS OS VÍDEOS", use_container_width=True):
+                try:
+                    vids = supabase.table("feed_videos").select("id").execute()
+                    for v in vids.data: supabase.table("feed_videos").delete().eq("id", v['id']).execute()
+                    st.success("Feed limpo!"); st.rerun()
                 except: pass
