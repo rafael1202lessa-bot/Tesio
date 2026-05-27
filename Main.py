@@ -29,7 +29,7 @@ if "perfil_visitado" not in st.session_state:
 if "historico_ia" not in st.session_state:
     st.session_state.historico_ia = []
 
-# --- BANCO DE DADOS LOCAL DO CHAT EXV (Sessão Ativa) ---
+# --- BANCO DE DADOS LOCAL DO CHAT E LIVES (Sessão Ativa) ---
 if "chat_privado_salas" not in st.session_state:
     st.session_state.chat_privado_salas = {} 
 if "chat_grupos" not in st.session_state:
@@ -38,6 +38,12 @@ if "sala_privada_atual" not in st.session_state:
     st.session_state.sala_privada_atual = None
 if "codigo_grupo_atual" not in st.session_state:
     st.session_state.codigo_grupo_atual = None
+if "live_ativa" not in st.session_state:
+    st.session_state.live_ativa = False
+if "live_chat" not in st.session_state:
+    st.session_state.live_chat = []
+if "live_alertas" not in st.session_state:
+    st.session_state.live_alertas = []
 
 CODIGO_CORRETO = "ChatPrivado2026"
 
@@ -46,6 +52,21 @@ TITULOS = {
     "rafael_secundario": "⚔️ Vice-Dev",
     "amiga_divulgadora": "📢 Divulgadora",
 }
+
+# --- FUNÇÃO PARA SISTEMA DE TEXT-TO-SPEECH (LIVE PIX VOZ ALTA) ---
+def emitir_alerta_voz(texto_mensagem):
+    """Injeta um script JavaScript discreto para ler a mensagem em voz alta no navegador."""
+    js_code = f"""
+    <script>
+    if ('speechSynthesis' in window) {{
+        var msg = new SpeechSynthesisUtterance({repr(texto_mensagem)});
+        msg.lang = 'pt-BR';
+        msg.rate = 1.1; 
+        window.speechSynthesis.speak(msg);
+    }}
+    </script>
+    """
+    st.components.v1.html(js_code, height=0, width=0)
 
 # --- FUNÇÃO PARA GERAR ID DE SALA PRIVADA ÚNICA ---
 def obter_id_sala_privada(userA, userB):
@@ -169,6 +190,7 @@ selo_sidebar, estilo_da_moldura = aplicar_moldura_e_selo(user_atual.get('usernam
 st.sidebar.markdown(f'<img src="{foto_side}" style="{estilo_da_moldura}" width="100">', unsafe_allow_html=True)
 st.sidebar.write("") 
 st.sidebar.title(f"@{user_atual.get('username', '')}{selo_sidebar}")
+st.sidebar.markdown(f"🪙 **Silver Coins:** {user_atual.get('dinheiro', 0)}")
 if st.sidebar.button("Sair da Conta"):
     st.session_state.logado = False
     st.rerun()
@@ -254,75 +276,105 @@ if aba_ativa == "📱 Feed":
                         except: st.error("Erro ao apagar.")
                 st.write("---")
 
-# --- 2. ABA GRAVAR/POSTAR ---
+# --- 2. ABA GRAVAR/POSTAR (ESTÚDIO COM CENTRAL DA LIVE + LIVE PIX TTS) ---
 elif aba_ativa == "🎥 Gravar/Postar":
-    st.title("🎥 Estúdio de Criação Silver Tok")
+    st.title("🎥 Estúdio de Criação & Live")
     
     aba_upload, aba_link, aba_live = st.tabs([
         "📁 Enviar Vídeo Gravado", 
         "🔗 Postar por Link", 
-        "🔴 Transmissão ao Vivo (Live)"
+        "🔴 Central do Streamer (Sua Live)"
     ])
     
     with aba_upload:
         st.subheader("Suba um vídeo da sua galeria")
         legenda_upload = st.text_input("Legenda do seu vídeo:", key="leg_up")
-        
-        # Aceita formatos comuns de vídeo gravados por celulares
         video_arquivo = st.file_uploader("Selecione o arquivo de vídeo", type=["mp4", "mov", "avi", "webm"])
         
         if st.button("🚀 Publicar Vídeo Gravado", use_container_width=True):
-            if not video_arquivo:
-                st.warning("Por favor, selecione um arquivo de vídeo primeiro!")
-            else:
-                # Nota técnica: Para produção, configure o Supabase Storage para armazenar o arquivo binário
-                # Aqui simulamos o processamento do arquivo recebido para a postagem
-                st.info("Processando arquivo de vídeo...")
-                try:
-                    # Exemplo de estrutura de inserção simulando o link do storage
-                    # Em um ambiente com Storage ativo, você faria: supabase.storage.from('videos').upload(...)
-                    st.success("Vídeo processado com sucesso! (Para funcionamento completo, integre com o Supabase Storage Bucket).")
-                except Exception as e:
-                    st.error(f"Erro ao subir arquivo: {str(e)}")
+            if not video_arquivo: st.warning("Selecione um arquivo primeiro!")
+            else: st.success("Vídeo processado! Integre com o Supabase Storage Bucket para persistência completa.")
                     
     with aba_link:
         legenda = st.text_input("Legenda do post:", key="leg_link")
         url_do_video = st.text_input("Link do vídeo (.mp4):", key="url_mp4")
         if st.button("Publicar Vídeo por Link", use_container_width=True):
-            if not url_do_video:
-                st.warning("Insira o link do vídeo.")
+            if not url_do_video: st.warning("Insira o link do vídeo.")
             else:
                 try:
                     supabase.table("feed_videos").insert({
-                        "username": user_atual.get('username'), 
-                        "nickname": user_atual.get('nickname'),
-                        "legenda": legenda, 
-                        "url_video": url_do_video, 
-                        "curtidas": 0
+                        "username": user_atual.get('username'), "nickname": user_atual.get('nickname'),
+                        "legenda": legenda, "url_video": url_do_video, "curtidas": 0
                     }).execute()
                     st.success("Publicado no Feed!")
-                except Exception as e: 
-                    st.error(f"Erro ao publicar: {str(e)}")
+                except Exception as e: st.error(f"Erro ao publicar: {str(e)}")
                     
     with aba_live:
-        st.subheader("📹 Central de Transmissão Silver Live")
-        st.write("Prepare seu cenário! O sistema de Live conecta sua câmera em tempo real com seus seguidores.")
+        st.subheader("📹 Painel de Controle de Transmissão")
         
-        titulo_live = st.text_input("Título da sua Live:", placeholder="Ex: Batendo papo com os devs ✨")
-        categoria_live = st.selectbox("Categoria:", ["Conversa", "Games", "Tutoriais", "Música"])
-        
-        col_live1, col_live2 = st.columns(2)
-        with col_live1:
-            if st.button("🔴 INICIAR TRANSMISSÃO AO VIVO", use_container_width=True):
-                if not titulo_live:
-                    st.warning("Dê um título para sua Live antes de iniciar!")
-                else:
-                    st.success(f"🎥 Transmissão '{titulo_live}' iniciada! Seus seguidores foram notificados.")
-                    # Aqui entrará o componente WebRTC/Streamlit-Webrtc para streaming de vídeo peer-to-peer
-        with col_live2:
-            if st.button("⏹️ Encerrar Live", use_container_width=True):
-                st.info("Transmissão encerrada.")
+        if not st.session_state.live_ativa:
+            titulo_live = st.text_input("Título da sua Live:", placeholder="Ex: Jogando com inscritos! 🔥")
+            if st.button("🔴 INICIAR LIVE", use_container_width=True):
+                if titulo_live:
+                    st.session_state.live_ativa = True
+                    st.session_state.live_chat = [{"remetente": "Sistema", "conteudo": f"Sua live '{titulo_live}' foi iniciada!"}]
+                    st.session_state.live_alertas = []
+                    st.rerun()
+                else: st.warning("Insira um título para começar.")
+        else:
+            st.success("🎥 VOCÊ ESTÁ AO VIVO!")
+            if st.button("⏹️ Encerrar Transmissão", use_container_width=True):
+                st.session_state.live_ativa = False
+                st.rerun()
+            
+            st.write("---")
+            col_video_retorno, col_chat_live = st.columns([4, 3])
+            
+            with col_video_retorno:
+                st.markdown("### 🖥️ Retorno do seu Vídeo")
+                # Exibe a câmera do desenvolvedor na tela para ver o próprio enquadramento
+                st.camera_input("Monitor da Câmera", key="monitor_live_cam")
                 
+                st.markdown("### 🪙 Últimos Alertas Live Pix (Voz Alta)")
+                for alerta in st.session_state.live_alertas[-3:]:
+                    st.warning(f"🎁 **{alerta['usuario']}** enviou **{alerta['moedas']} Silver Coins**:\n*{alerta['msg']}*")
+            
+            with col_chat_live:
+                st.markdown("### 💬 Chat da Live")
+                
+                # Container scannável de chat da transmissão
+                with st.container(border=True, height=250):
+                    for msg_l in st.session_state.live_chat:
+                        st.write(f"**@{msg_l['remetente']}:** {msg_l['conteudo']}")
+                
+                # Simulador de Interatividade da audiência (Para o Dev testar o Live Pix)
+                st.write("---")
+                st.caption("🧪 Simulador de Público (Modo Dev)")
+                sim_user = st.text_input("Usuário do fã:", value="seguidor_vip_01", key="sim_u")
+                sim_txt = st.text_input("Mensagem do Chat:", placeholder="Manda salve Rafa!", key="sim_t")
+                
+                c_b1, c_b2 = st.columns(2)
+                with c_b1:
+                    if st.button("💬 Simular Mensagem", use_container_width=True):
+                        if sim_txt:
+                            st.session_state.live_chat.append({"remetente": sim_user, "conteudo": sim_txt})
+                            st.rerun()
+                with c_b2:
+                    sim_coins = st.number_input("Moedas:", min_value=10, value=50, step=10)
+                    if st.button("🎁 Simular Silver Coins", use_container_width=True):
+                        if sim_txt:
+                            # Adiciona no chat
+                            texto_completo_alerta = f"Enviou {sim_coins} Silver Coins! Mensagem: {sim_txt}"
+                            st.session_state.live_chat.append({"remetente": sim_user, "conteudo": f"⭐ {texto_completo_alerta}"})
+                            
+                            # Registra o alerta estruturado
+                            st.session_state.live_alertas.append({"usuario": sim_user, "moedas": sim_coins, "msg": sim_txt})
+                            
+                            # DISPARA A LEITURA EM VOZ ALTA DO LIVE PIX
+                            texto_leitura = f"{sim_user} enviou {sim_coins} Silver Coins. {sim_txt}"
+                            emitir_alerta_voz(texto_leitura)
+                            st.rerun()
+
 # --- 3. ABA CHAT EXV ---
 elif aba_ativa == "💬 Chat EXV":
     st.title("💬 Chat EXV")
@@ -444,10 +496,10 @@ elif aba_ativa == "🧠 Silver IA":
             st.info(f"❓ **Você:** {chat['pergunta']}")
             st.success(f"🤖 **Silver:** {chat['resposta']}")
 
-# --- 5. ABA LOJA DO SITE ---
+# --- 5. ABA LOJA DO SITE (ATUALIZADA COM SILVER COINS) ---
 elif aba_ativa == "🛒 Loja do Site":
-    st.title("🛒 Loja de Customização")
-    st.write(f"💰 **Sua Carteira:** ${user_atual.get('dinheiro', 0)}")
+    st.title("🛒 Loja de Customizações e Vantagens")
+    st.write(f"🪙 **Sua Carteira:** {user_atual.get('dinheiro', 0)} Silver Coins")
     st.write("---")
 
     customizacoes = {
@@ -460,7 +512,7 @@ elif aba_ativa == "🛒 Loja do Site":
             col_info, col_btn = st.columns([3, 1])
             with col_info:
                 st.markdown(f"### {item}")
-                st.markdown(f"💰 Custo: **${preco}**")
+                st.markdown(f"🪙 Custo: **{preco} Silver Coins**")
             with col_btn:
                 st.write("<br>", unsafe_allow_html=True)
                 meus_visuais = user_atual.get('itens_exclusivos', [])
@@ -479,10 +531,10 @@ elif aba_ativa == "🛒 Loja do Site":
                                 st.success(f"🎉 '{item}' adquirido!")
                                 st.rerun()
                             except: st.error("Erro ao realizar compra.")
-                        else: st.error("❌ Saldo insuficiente!")
+                        else: st.error("❌ Saldo de Silver Coins insuficiente!")
             st.write("---")
 
-# --- 6. ABA MEU PERFIL (ATUALIZADA COM COMPONENTE ADICIONAR AMIGO) ---
+# --- 6. ABA MEU PERFIL ---
 elif aba_ativa == "👤 Meu Perfil":
     meus_itens_perfil = user_atual.get('itens_exclusivos', [])
     if not isinstance(meus_itens_perfil, list): meus_itens_perfil = []
@@ -503,12 +555,11 @@ elif aba_ativa == "👤 Meu Perfil":
         c1, c2, c3 = st.columns(3)
         c1.metric("Seguidores", user_atual.get('seguidores', 0))
         c2.metric("Seguindo", user_atual.get('seguindo', 0))
-        c3.metric("Carteira", f"${user_atual.get('dinheiro', 0)}")
+        c3.metric("Coins", f"{user_atual.get('dinheiro', 0)}")
     
     st.write(f"📝 **Bio:** {user_atual.get('bio', 'Disponível')}")
     st.write("---")
     
-    # GERENCIADOR DE ADICIONAR SEGUIDOR / LISTA DE AMIGOS
     exp_seg = st.expander("👥 Ver Meus Seguidores / Amigos")
     with exp_seg:
         st.markdown("### ➕ Adicionar Novo Amigo/Seguidor")
@@ -516,37 +567,32 @@ elif aba_ativa == "👤 Meu Perfil":
         if st.button("➕ Adicionar na Lista", use_container_width=True):
             if amigo_para_add:
                 try:
-                    # Validar se o usuário existe no Supabase
                     checar_user = supabase.table("perfis_usuarios").select("username").eq("username", amigo_para_add).execute()
                     if checar_user.data:
                         lista_amigos_perfil = user_atual.get('lista_amigos', [])
                         if not isinstance(lista_amigos_perfil, list): lista_amigos_perfil = []
                         
-                        if amigo_para_add in lista_amigos_perfil:
-                            st.warning("Este usuário já está na sua lista!")
+                        if amigo_para_add in lista_amigos_perfil: st.warning("Este usuário já está na sua lista!")
                         else:
                             lista_amigos_perfil.append(amigo_para_add)
                             supabase.table("perfis_usuarios").update({"lista_amigos": lista_amigos_perfil}).eq("username", user_atual.get('username')).execute()
                             st.success(f"🎉 @{amigo_para_add} adicionado com sucesso!")
                             st.rerun()
-                    else:
-                        st.error("Usuário não encontrado no Silver Tok.")
+                    else: st.error("Usuário não encontrado no Silver Tok.")
                 except: st.error("Erro ao processar adição de amigo.")
             else: st.warning("Por favor, digite um nome de usuário.")
 
         st.write("---")
-        st.write("Clique em um seguidor abaixo para abrir a função **Conversa com Seguidor**.")
         lista_amigos_perfil = user_atual.get('lista_amigos', [])
         if lista_amigos_perfil and isinstance(lista_amigos_perfil, list):
             for amg in lista_amigos_perfil:
                 col_amg_nome, col_amg_btn = st.columns([3, 2])
-                with col_amg_nome:
-                    st.write(f"👤 **@{amg}**")
+                with col_amg_nome: st.write(f"👤 **@{amg}**")
                 with col_amg_btn:
                     if st.button(f"💬 Conversa com Seguidor", key=f"chat_seg_{amg}", use_container_width=True):
                         st.session_state.sala_privada_atual = obter_id_sala_privada(user_atual.get('username'), amg)
                         st.session_state.codigo_grupo_atual = None
-                        st.success(f"Sala configurada! Entre na aba '💬 Chat EXV' para conversar com @{amg}.")
+                        st.rerun()
         else: st.caption("Nenhum seguidor ou amigo adicionado ainda.")
     
     st.write("---")
@@ -572,7 +618,7 @@ elif aba_ativa == "👤 Meu Perfil":
                         st.rerun()
     else: st.info("Você não possui itens.")
 
-# --- 7. ABA VISITAR PERFIL ALHEIO (ATUALIZADA COM BOTÃO SEGUIR/ADICIONAR) ---
+# --- 7. ABA VISITAR PERFIL ALHEIO ---
 elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
     alvo = st.session_state.perfil_visitado
     try:
@@ -595,26 +641,20 @@ elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
             st.write(f"📝 {p.get('bio', '')}")
             
             st.write("---")
-            
-            # Botões de Ação no Perfil do Usuário
             c_btn1, c_btn2 = st.columns(2)
             with c_btn1:
-                if st.button("👥 Adicionar como Amigo/Seguidor", key="btn_add_amigo_perfil_direto", use_container_width=True):
+                if st.button("👥 Adicionar como Amigo", key="btn_add_amigo_perfil_direto", use_container_width=True):
                     lista_atual_amigos = user_atual.get('lista_amigos', [])
                     if not isinstance(lista_atual_amigos, list): lista_atual_amigos = []
-                    
-                    if alvo in lista_atual_amigos:
-                        st.warning("Você já adicionou esse perfil!")
-                    else:
+                    if alvo not in lista_atual_amigos:
                         lista_atual_amigos.append(alvo)
                         supabase.table("perfis_usuarios").update({"lista_amigos": lista_atual_amigos}).eq("username", user_atual.get('username')).execute()
-                        st.success(f"🎉 @{alvo} foi adicionado à sua lista de amigos!")
-            
+                        st.success(f"🎉 @{alvo} adicionado!")
             with c_btn2:
                 if st.button("💬 Conversa com Seguidor", key="btn_conversa_direta_perfil", use_container_width=True):
                     st.session_state.sala_privada_atual = obter_id_sala_privada(user_atual.get('username'), alvo)
                     st.session_state.codigo_grupo_atual = None
-                    st.success("Sala Privada configurada! Vá até a aba '💬 Chat EXV' para conversar.")
+                    st.success("Sala Privada configurada! Vá até o Chat EXV.")
                 
             if st.button("Voltar ao Feed", use_container_width=True):
                 st.session_state.perfil_visitado = None
@@ -637,54 +677,41 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
             st.subheader("👥 Seguidores")
             qtd_seguidores = st.number_input("Quantidade", min_value=0, value=1000)
             if st.button("Definir", key="btn_seg"):
-                try: 
-                    supabase.table("perfis_usuarios").update({"seguidores": qtd_seguidores}).eq("username", usuario_alvo).execute()
-                    st.rerun()
-                except: st.error("Erro na API ao atualizar seguidores.")
+                supabase.table("perfis_usuarios").update({"seguidores": qtd_seguidores}).eq("username", usuario_alvo).execute()
+                st.rerun()
         with col2:
-            st.subheader("💰 Carteira")
-            qtd_dinheiro = st.number_input("Dinheiro ($)", min_value=0, value=500)
+            st.subheader("💰 Coins")
+            qtd_dinheiro = st.number_input("Silver Coins", min_value=0, value=500)
             if st.button("Definir", key="btn_money"):
-                try: 
-                    supabase.table("perfis_usuarios").update({"dinheiro": qtd_dinheiro}).eq("username", usuario_alvo).execute()
-                    st.rerun()
-                except: st.error("Erro na API ao atualizar carteira.")
+                supabase.table("perfis_usuarios").update({"dinheiro": qtd_dinheiro}).eq("username", usuario_alvo).execute()
+                st.rerun()
         with col3:
             st.subheader("🎖️ Cargos")
             novo_titulo = st.selectbox("Cargo:", ["👑 Desenvolvedor", "⚔️ Vice-Dev", "📢 Divulgadora", "🧪 Tester", "🏅 best friends of the dev", "Usuário"])
             if st.button("Atualizar", key="btn_cargo"):
-                try: 
-                    supabase.table("perfis_usuarios").update({"titulo": novo_titulo}).eq("username", usuario_alvo).execute()
-                    st.rerun()
-                except: st.error("Erro na API ao mudar cargo.")
+                supabase.table("perfis_usuarios").update({"titulo": novo_titulo}).eq("username", usuario_alvo).execute()
+                st.rerun()
         with col4:
             st.subheader("🔨 Moderação")
             st.write("<br>", unsafe_allow_html=True)
             if st.button("🚫 Banir Usuário", key="btn_banir", use_container_width=True):
-                try: 
-                    supabase.table("perfis_usuarios").update({"titulo": "❌ BANIDO"}).eq("username", usuario_alvo).execute()
-                    st.success(f"@{usuario_alvo} banido!")
-                    st.rerun()
-                except Exception as e: st.error("Erro ao banir usuário no banco.")
+                supabase.table("perfis_usuarios").update({"titulo": "❌ BANIDO"}).eq("username", usuario_alvo).execute()
+                st.rerun()
 
         # --- SEÇÃO DO GERENCIADOR DE INVENTÁRIO ---
         st.write("---")
         st.subheader("🎒 Gerenciador de Inventário (God Mode)")
         item_para_dar = st.text_input("Nome do Item para dar ao usuário:", placeholder="Ex: 🖼️ Moldura de Fogo 🔥")
         if st.button("🎁 Entregar Item para o Usuário", use_container_width=True):
-            if not item_para_dar: 
-                st.warning("Digite o nome de um item antes de enviar!")
-            else:
-                try:
-                    busca_user = supabase.table("perfis_usuarios").select("itens_exclusivos").eq("username", usuario_alvo).execute()
-                    if busca_user.data:
-                        inventario_atual = busca_user.data[0].get('itens_exclusivos', [])
-                        if not isinstance(inventario_atual, list): inventario_atual = []
-                        inventario_atual.append(item_para_dar)
-                        supabase.table("perfis_usuarios").update({"itens_exclusivos": inventario_atual}).eq("username", usuario_alvo).execute()
-                        st.success(f"🎉 '{item_para_dar}' injetado no inventário de @{usuario_alvo}!")
-                        st.rerun()
-                except Exception as e: st.error("Erro ao injetar item.")
+            if item_para_dar:
+                busca_user = supabase.table("perfis_usuarios").select("itens_exclusivos").eq("username", usuario_alvo).execute()
+                if busca_user.data:
+                    inventario_atual = busca_user.data[0].get('itens_exclusivos', [])
+                    if not isinstance(inventario_atual, list): inventario_atual = []
+                    inventario_atual.append(item_para_dar)
+                    supabase.table("perfis_usuarios").update({"itens_exclusivos": inventario_atual}).eq("username", usuario_alvo).execute()
+                    st.success(f"🎉 Item injetado!")
+                    st.rerun()
 
         # --- SEÇÃO DE AÇÕES GLOBAIS ---
         st.write("---")
@@ -693,21 +720,16 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
         with col_glob1:
             valor_bonus = st.number_input("Valor do Bônus Global:", min_value=1, value=100)
             if st.button("💰 Dar Bônus para Todos", use_container_width=True):
-                try:
-                    todos = supabase.table("perfis_usuarios").select("username, dinheiro").execute()
-                    for u in todos.data:
-                        novo_saldo = u.get('dinheiro', 0) + valor_bonus
-                        supabase.table("perfis_usuarios").update({"dinheiro": novo_saldo}).eq("username", u['username']).execute()
-                    st.success("Bônus global enviado!")
-                    st.rerun()
-                except: st.error("Erro ao executar bônus global.")
+                todos = supabase.table("perfis_usuarios").select("username, dinheiro").execute()
+                for u in todos.data:
+                    novo_saldo = u.get('dinheiro', 0) + valor_bonus
+                    supabase.table("perfis_usuarios").update({"dinheiro": novo_saldo}).eq("username", u['username']).execute()
+                st.success("Bônus global enviado!")
+                st.rerun()
         with col_glob2:
             st.write("<br>", unsafe_allow_html=True)
             if st.button("🧹 APAGAR TODOS OS VÍDEOS", use_container_width=True):
-                try:
-                    vids = supabase.table("feed_videos").select("id").execute()
-                    for v in vids.data: 
-                        supabase.table("feed_videos").delete().eq("id", v['id']).execute()
-                    st.success("Feed limpo!")
-                    st.rerun()
-                except: st.error("Erro ao limpar feed de vídeos.")
+                vids = supabase.table("feed_videos").select("id").execute()
+                for v in vids.data: supabase.table("feed_videos").delete().eq("id", v['id']).execute()
+                st.rerun()
+  
