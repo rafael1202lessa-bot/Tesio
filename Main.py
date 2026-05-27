@@ -34,7 +34,8 @@ if "logs" not in st.session_state:
 # =====================================================================
 def fazer_login(email, senha):
     try:
-        auth_response = supabase.auth.sin_in_with_password({"email": email, "password": senha})
+        # CORRIGIDO: sign_in_with_password com "g"
+        auth_response = supabase.auth.sign_in_with_password({"email": email, "password": senha})
         st.session_state.user_id = auth_response.user.id
         st.success("Conectado ao reino!")
         carregar_personagem(auth_response.user.id)
@@ -131,4 +132,4 @@ elif st.session_state.personagem:
     st.subheader("Histórico da Batalha")
     for log in reversed(st.session_state.logs[-5:]): # Mostra os últimos 5 eventos
         st.text(log)
-      
+                               
