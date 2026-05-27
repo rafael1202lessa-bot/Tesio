@@ -44,10 +44,17 @@ def fazer_login(email, senha):
 
 def criar_conta(email, senha, username):
     try:
-        auth_response = supabase.auth.sign_up({"email": email, "password": senha})
+        # Cria o usuário ignorando o envio e o limite de e-mails do provedor
+        auth_response = supabase.auth.admin_create_user({
+            "email": email,
+            "password": senha,
+            "email_confirm": True
+        })
         user_id = auth_response.user.id
+        
+        # Insere o nome de usuário na tabela de perfis
         supabase.table("perfis").insert({"id": user_id, "username": username}).execute()
-        st.success("✨ Conta criada com sucesso! Vá para a aba 'Entrar no Jogo'.")
+        st.success("✨ Conta criada com sucesso! Mude para a aba '🔒 Entrar no Jogo' para jogar.")
     except Exception as e:
         st.error(f"Erro ao criar conta: {e}")
 
@@ -60,9 +67,17 @@ def carregar_personagem(user_id):
 
 def criar_personagem_padrao(user_id):
     novo_p = {
-        "usuario_id": user_id, "nome": "Rafael_oficial", "classe": "Guerreiro",
-        "hp_max": 150, "hp_atual": 150, "mana_max": 0, "mana_atual": 0,
-        "ataque": 25, "magia": 0, "defesa": 10, "ouro": 10
+        "usuario_id": user_id, 
+        "nome": "Rafael_oficial", 
+        "classe": "Guerreiro",
+        "hp_max": 150, 
+        "hp_atual": 150, 
+        "mana_max": 0, 
+        "mana_atual": 0,
+        "ataque": 25, 
+        "magia": 0, 
+        "defesa": 10, 
+        "ouro": 10
     }
     try:
         insere = supabase.table("personagens").insert(novo_p).execute()
@@ -73,7 +88,8 @@ def criar_personagem_padrao(user_id):
 def salvar_progresso():
     p = st.session_state.personagem
     supabase.table("personagens").update({
-        "hp_atual": p["hp_atual"], "ouro": p["ouro"]
+        "hp_atual": p["hp_atual"], 
+        "ouro": p["ouro"]
     }).eq("id", p["id"]).execute()
 
 # =====================================================================
@@ -109,20 +125,19 @@ if st.session_state.user_id is None:
 elif st.session_state.personagem:
     p = st.session_state.personagem
     
-    # Status fixo no topo lateral (Ouro e Nível)
+    # Status na barra lateral
     st.sidebar.markdown(f"### 🛡️ {p['nome']}")
     st.sidebar.markdown(f"**Classe:** {p['classe']}")
     st.sidebar.metric(label="Moedas de Ouro", value=f"{p['ouro']} 🪙")
     
     st.divider()
     
-    # ARENA DE COMBATE EM COLUNAS (Visual de Cartas/Lutadores)
+    # ARENA DE COMBATE EM COLUNAS
     col_player, col_vs, col_enemy = st.columns([4, 2, 4])
     
     with col_player:
         st.markdown("<h3 style='text-align: center;'>🧝‍♂️ Você</h3>", unsafe_allow_html=True)
         st.caption(f"HP: {p['hp_atual']} / {p['hp_max']}")
-        # Barra de vida azul/verde para o jogador
         st.progress(max(0.0, min(1.0, p['hp_atual'] / p['hp_max'])))
         st.markdown(f"<p style='text-align: center;'>🛡️ Defesa: {p['defesa']}<br>⚔️ Ataque: {p['ataque']}</p>", unsafe_allow_html=True)
 
@@ -132,18 +147,16 @@ elif st.session_state.personagem:
     with col_enemy:
         st.markdown("<h3 style='text-align: center;'>👹 Orc</h3>", unsafe_allow_html=True)
         st.caption(f"HP: {st.session_state.orc_hp} / 120")
-        # Barra de vida vermelha para o monstro
         st.progress(max(0.0, min(1.0, st.session_state.orc_hp / 120)))
         st.markdown("<p style='text-align: center;'>🛡️ Defesa: 5<br>🪓 Ataque: 16</p>", unsafe_allow_html=True)
 
     st.divider()
     
-    # BOTÕES DE AÇÃO INTERATIVOS
+    # BOTÕES DE AÇÃO
     st.markdown("### Escolha sua Próxima Ação")
     btn_col1, btn_col2 = st.columns(2)
     
     with btn_col1:
-        # Botão grande de ataque com destaque visual
         if st.button("💥 ATACAR COM GOLPE HEROICO", use_container_width=True, disabled=p['hp_atual'] <= 0 or st.session_state.orc_hp <= 0):
             dano_jogador = max(1, p['ataque'] - 5)
             st.session_state.orc_hp -= dano_jogador
@@ -157,7 +170,7 @@ elif st.session_state.personagem:
                 st.session_state.orc_hp = 0
                 ouro_ganho = random.randint(5, 15)
                 p['ouro'] += ouro_ganho
-                p['hp_atual'] = p['hp_max']  # Cura automática após a vitória
+                p['hp_atual'] = p['hp_max']
                 st.session_state.logs.append(f"🏆 VITÓRIA! O Orc caiu. Você pilhou {ouro_ganho} moedas de ouro do corpo dele!")
                 salvar_progresso()
                 
@@ -175,11 +188,11 @@ elif st.session_state.personagem:
             st.session_state.logs = ["🍃 Você caminhou pela floresta e encontrou outro Orc bloqueando a passagem!"]
             st.rerun()
             
-    # CAIXA DE TEXTO ESTILO CONSOLE PARA OS LOGS DE COMBATE
+    # HISTÓRICO EM CAIXA DE TEXTO
     st.markdown("### 📜 Diário de Combate")
     caixa_texto = ""
-    for log in reversed(st.session_state.logs[-6:]):  # Mostra as últimas 6 linhas
+    for log in reversed(st.session_state.logs[-6:]):
         caixa_texto += log + "\n\n"
         
     st.text_area(label="Eventos recentes", value=caixa_texto, height=180, label_visibility="collapsed", disabled=True)
-                    
+            
