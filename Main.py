@@ -34,7 +34,7 @@ TITULOS = {
 }
 
 # --- FUNÇÃO PARA GERAR SELO E MOLDURA DE PERFIL ---
-def aplicar_moldura_e_selo(username, titulo, moldura_ativa=None):
+def aplicar_moldura_e_selo(username, titulo, itens_usuario=None):
     selo = ""
     if username == "rafael_oficial":
         selo = " ✨[👑 DEV]"
@@ -43,14 +43,14 @@ def aplicar_moldura_e_selo(username, titulo, moldura_ativa=None):
     elif titulo == "🏅 best friends of the dev":
         selo = " 🌟"
         
-    # Estilo CSS padrão da imagem redonda
     estilo_moldura = "border-radius: 50%; object-fit: cover;"
     
-    # Aplica a borda apenas se a moldura estiver ATIVA no perfil
-    if moldura_ativa == "🖼️ Moldura de Fogo 🔥":
-        estilo_moldura = "border-radius: 50%; object-fit: cover; border: 4px solid #FF4500; box-shadow: 0 0 15px #FF8C00;"
-    elif moldura_ativa == "💎 Moldura de Diamante ✨":
-        estilo_moldura = "border-radius: 50%; object-fit: cover; border: 4px solid #00FFFF; box-shadow: 0 0 15px #00BFFF;"
+    # Procura se existe alguma moldura com a tag [EQUIPADO] na lista de itens
+    if itens_usuario and isinstance(itens_usuario, list):
+        if "[EQUIPADO] 🖼️ Moldura de Fogo 🔥" in itens_usuario:
+            estilo_moldura = "border-radius: 50%; object-fit: cover; border: 4px solid #FF4500; box-shadow: 0 0 15px #FF8C00;"
+        elif "[EQUIPADO] 💎 Moldura de Diamante ✨" in itens_usuario:
+            estilo_moldura = "border-radius: 50%; object-fit: cover; border: 4px solid #00FFFF; box-shadow: 0 0 15px #00BFFF;"
             
     return selo, estilo_moldura
 
@@ -75,10 +75,7 @@ def criar_conta(username, password, nickname, codigo):
             "verificado": False,
             "foto_perfil": "https://img.icons8.com/colors/150/test-account.png",
             "bio": "Olá! Estou usando o Silver Tok.",
-            "itens_exclusivos": [],
-            "moldura_ativa": None,
-            "banner_ativo": None,
-            "caixa_ativa": None
+            "itens_exclusivos": []
         }
         supabase.table("perfis_usuarios").insert(novo_usuario).execute()
         return "Sucesso"
@@ -133,7 +130,6 @@ def atualizar_sessao():
 atualizar_sessao()
 user_atual = st.session_state.user_data
 
-# Validações globais de banimento e manutenção
 if user_atual.get("titulo") == "❌ BANIDO":
     st.title("🚫 Conta Bloqueada")
     st.error("Você foi banido deste aplicativo pela administração.")
@@ -146,15 +142,16 @@ if ESTADO_DESENVOLVIMENTO and user_atual.get("titulo") not in ["👑 Desenvolved
         st.rerun()
     st.stop()
 
-
 # --- SIDEBAR (BARRA LATERAL) ---
 foto_side = user_atual.get('foto_perfil')
 if not foto_side or str(foto_side).strip() in ["0", "None", ""] or not str(foto_side).startswith("http"):
     foto_side = "https://img.icons8.com/colors/150/test-account.png"
 
-# Pega a moldura ativa atual do usuário
-moldura_corrente = user_atual.get('moldura_ativa')
-selo_sidebar, estilo_da_moldura = aplicar_moldura_e_selo(user_atual.get('username', ''), user_atual.get('titulo', ''), moldura_corrente)
+meus_itens_sidebar = user_atual.get('itens_exclusivos', [])
+if not isinstance(meus_itens_sidebar, list):
+    meus_itens_sidebar = []
+
+selo_sidebar, estilo_da_moldura = aplicar_moldura_e_selo(user_atual.get('username', ''), user_atual.get('titulo', ''), meus_itens_sidebar)
 
 st.sidebar.markdown(f'<img src="{foto_side}" style="{estilo_da_moldura}" width="100">', unsafe_allow_html=True)
 st.sidebar.write("") 
@@ -163,7 +160,6 @@ st.sidebar.title(f"@{user_atual.get('username', '')}{selo_sidebar}")
 if st.sidebar.button("Sair da Conta"):
     st.session_state.logado = False
     st.rerun()
-
 
 # --- MENU PRINCIPAL ---
 abas = ["📱 Feed", "🎥 Gravar/Postar", "🛒 Loja do Site", "👤 Meu Perfil"]
@@ -199,7 +195,7 @@ if aba_ativa == "📱 Feed":
             with st.container():
                 foto_autor = "https://img.icons8.com/colors/150/test-account.png"
                 titulo_autor = "Usuário"
-                m_ativa_autor = None
+                itens_autor = []
                 try:
                     autor_req = supabase.table("perfis_usuarios").select("*").eq("username", v_username).execute()
                     if autor_req.data:
@@ -207,11 +203,11 @@ if aba_ativa == "📱 Feed":
                         if not foto_autor or str(foto_autor).strip() in ["0", "None", ""]:
                             foto_autor = "https://img.icons8.com/colors/150/test-account.png"
                         titulo_autor = autor_req.data[0].get('titulo', 'Usuário')
-                        m_ativa_autor = autor_req.data[0].get('moldura_ativa')
+                        itens_autor = autor_req.data[0].get('itens_exclusivos', [])
                 except:
                     pass
                 
-                selo_post, moldura_post = aplicar_moldura_e_selo(v_username, titulo_autor, m_ativa_autor)
+                selo_post, moldura_post = aplicar_moldura_e_selo(v_username, titulo_autor, itens_autor)
                 
                 col_foto, col_nome = st.columns([1, 5])
                 with col_foto:
@@ -224,10 +220,8 @@ if aba_ativa == "📱 Feed":
                 if v_legenda: st.write(v_legenda)
                 
                 if v_url:
-                    try:
-                        st.video(v_url)
-                    except:
-                        st.error("Não foi possível carregar este vídeo.")
+                    try: st.video(v_url)
+                    except: st.error("Não foi possível carregar este vídeo.")
                 
                 c1, c2, c3 = st.columns(3)
                 with c1:
@@ -235,8 +229,7 @@ if aba_ativa == "📱 Feed":
                         try:
                             supabase.table("feed_videos").update({"curtidas": v_curtidas + 1}).eq("id", v_id).execute()
                             st.rerun()
-                        except:
-                            pass
+                        except: pass
                 with c2:
                     st.button("🔗 Copiar", key=f"s_{v_id}", use_container_width=True)
                 with c3:
@@ -250,8 +243,7 @@ if aba_ativa == "📱 Feed":
                         try:
                             supabase.table("feed_videos").delete().eq("id", v_id).execute()
                             st.rerun()
-                        except:
-                            pass
+                        except: pass
                 st.write("---")
 
 # --- 2. ABA GRAVAR/POSTAR ---
@@ -304,7 +296,8 @@ elif aba_ativa == "🛒 Loja do Site":
                 if not isinstance(meus_visuais, list):
                     meus_visuais = []
                 
-                if item in meus_visuais:
+                # Verifica se possui normal ou equipado
+                if item in meus_visuais or f"[EQUIPADO] {item}" in meus_visuais:
                     st.button("✅ Adquirido", key=f"loja_{item}", disabled=True, use_container_width=True)
                 else:
                     if st.button(f"🛒 Adquirir", key=f"comprar_{item}", use_container_width=True):
@@ -325,12 +318,13 @@ elif aba_ativa == "🛒 Loja do Site":
                             st.error("❌ Saldo insuficiente!")
             st.write("---")
 
-# --- 4. ABA MEU PERFIL (SISTEMA DE EQUIPAR/DESEQUIPAR ATIVADO!) ---
+# --- 4. ABA MEU PERFIL (SISTEMA TOTALMENTE ADAPTADO SEM COLUNAS NOVAS) ---
 elif aba_ativa == "👤 Meu Perfil":
     meus_itens_perfil = user_atual.get('itens_exclusivos', [])
-    m_ativa = user_atual.get('moldura_ativa')
-    
-    selo_meu_perfil, moldura_meu_perfil = aplicar_moldura_e_selo(user_atual.get('username'), user_atual.get('titulo'), m_ativa)
+    if not isinstance(meus_itens_perfil, list):
+        meus_itens_perfil = []
+        
+    selo_meu_perfil, moldura_meu_perfil = aplicar_moldura_e_selo(user_atual.get('username'), user_atual.get('titulo'), meus_itens_perfil)
     
     col_foto, col_stats = st.columns([1, 2])
     with col_foto:
@@ -350,30 +344,56 @@ elif aba_ativa == "👤 Meu Perfil":
     
     st.write(f"📝 **Bio:** {user_atual.get('bio', 'Disponível')}")
     
-    # --- GERENCIADOR DE INVENTÁRIO (EQUIPAR / DESEQUIPAR CORES E MOLDURAS) ---
     st.write("---")
     st.subheader("🎒 Meu Inventário Visual")
     
+    # Limpa tags duplicadas ou vazias se houver
+    meus_itens_perfil = [x for x in meus_itens_perfil if x]
+    
     if meus_itens_perfil:
-        for item in meus_itens_perfil:
+        # Criamos uma lista limpa para iteração para evitar conflito ao modificar
+        itens_para_exibir = list(set([item.replace("[EQUIPADO] ", "") for item in meus_itens_perfil]))
+        
+        for item_base in itens_para_exibir:
             col_item_nome, col_item_acao = st.columns([3, 1])
+            
+            esta_equipado = f"[EQUIPADO] {item_base}" in meus_itens_perfil
+            
             with col_item_nome:
-                st.markdown(f"✨ **{item}**")
+                if esta_equipado:
+                    st.markdown(f"🟢 **{item_base}** *(Equipado)*")
+                else:
+                    st.markdown(f"⚪ {item_base}")
             
             with col_item_acao:
-                # Lógica para MOLDURAS
-                if "Moldura" in item:
-                    if m_ativa == item:
-                        if st.button("🔴 Desequipar", key=f"deseq_{item}", use_container_width=True):
-                            supabase.table("perfis_usuarios").update({"moldura_active": None, "moldura_ativa": None}).eq("username", user_atual.get('username')).execute()
-                            st.rerun()
-                    else:
-                        if st.button("🟢 Equipar", key=f"eq_{item}", use_container_width=True):
-                            supabase.table("perfis_usuarios").update({"moldura_ativa": item}).eq("username", user_atual.get('username')).execute()
-                            st.rerun()
+                if esta_equipado:
+                    if st.button("🔴 Desequipar", key=f"deseq_{item_base}", use_container_width=True):
+                        # Remove a tag de equipado e volta o item ao normal
+                        nova_lista = [x for x in meus_itens_perfil if x != f"[EQUIPADO] {item_base}"]
+                        nova_lista.append(item_base)
+                        supabase.table("perfis_usuarios").update({"itens_exclusivos": nova_lista}).eq("username", user_atual.get('username')).execute()
+                        st.rerun()
                 else:
-                    # Outros itens estéticos (Banners / Caixas) por enquanto mostram como Ativos
-                    st.caption("Ativado")
+                    if st.button("🟢 Equipar", key=f"eq_{item_base}", use_container_width=True):
+                        nova_lista = []
+                        # Se for moldura, desequipa qualquer outra moldura ativa primeiro
+                        if "Moldura" in item_base:
+                            for x in meus_itens_perfil:
+                                if "Moldura" in x:
+                                    # Volta qualquer moldura equipada para o estado normal
+                                    limpo = x.replace("[EQUIPADO] ", "")
+                                    if limpo not in nova_lista: nova_lista.append(limpo)
+                                else:
+                                    if x not in nova_lista: nova_lista.append(x)
+                        else:
+                            nova_lista = list(meus_itens_perfil)
+                        
+                        # Remove o item do modo normal e adiciona como equipado
+                        if item_base in nova_lista: nova_lista.remove(item_base)
+                        nova_lista.append(f"[EQUIPADO] {item_base}")
+                        
+                        supabase.table("perfis_usuarios").update({"itens_exclusivos": nova_lista}).eq("username", user_atual.get('username')).execute()
+                        st.rerun()
     else:
         st.info("Você não possui itens comprados na loja ainda.")
 
@@ -388,10 +408,9 @@ elif aba_ativa == "👤 Meu Perfil":
                 supabase.table("perfis_usuarios").update({
                     "nickname": novo_nick, "bio": nova_bio, "foto_perfil": nova_foto
                 }).eq("username", user_atual.get('username')).execute()
-                st.success("Perfil atualizado!")
+                st.success("Perfil updated!")
                 st.rerun()
-            except Exception as e:
-                st.error(f"Erro ao salvar: {str(e)}")
+            except Exception as e: st.error(f"Erro ao salvar: {str(e)}")
 
     st.write("---")
     st.subheader("🎬 Meus Vídeos")
@@ -399,8 +418,7 @@ elif aba_ativa == "👤 Meu Perfil":
         meus_vids = supabase.table("feed_videos").select("*").eq("username", user_atual.get('username')).execute()
         for v in meus_vids.data: 
             if v.get('url_video'): st.video(v['url_video'])
-    except:
-        st.info("Nenhum vídeo publicado.")
+    except: st.info("Nenhum vídeo publicado.")
 
 # --- 5. ABA VISITAR PERFIL ALHEIO ---
 elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
@@ -409,8 +427,8 @@ elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
         res = supabase.table("perfis_usuarios").select("*").eq("username", alvo).execute()
         if res.data:
             p = res.data[0]
-            m_alvo = p.get('moldura_ativa')
-            selo_visitado, moldura_visitado = aplicar_moldura_e_selo(p.get('username'), p.get('titulo', 'Usuário'), m_alvo)
+            itens_alvo = p.get('itens_exclusivos', [])
+            selo_visitado, moldura_visitado = aplicar_moldura_e_selo(p.get('username'), p.get('titulo', 'Usuário'), itens_alvo)
             
             col_f, col_s = st.columns([1, 2])
             with col_f: 
@@ -432,8 +450,7 @@ elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
             vids = supabase.table("feed_videos").select("*").eq("username", alvo).execute()
             for v in vids.data: 
                 if v.get('url_video'): st.video(v['url_video'])
-    except:
-        st.error("Erro ao carregar o perfil visitado.")
+    except: st.error("Erro ao carregar o perfil visitado.")
 
 # --- 6. PAINEL DEV ---
 elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_oficial":
@@ -441,8 +458,7 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
     try:
         usuarios_req = supabase.table("perfis_usuarios").select("username, nickname").execute()
         lista_usuarios = [u["username"] for u in usuarios_req.data]
-    except:
-        lista_usuarios = []
+    except: lista_usuarios = []
 
     if lista_usuarios:
         usuario_alvo = st.selectbox("Selecione o usuário alvo:", lista_usuarios)
