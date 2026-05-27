@@ -31,9 +31,9 @@ if "historico_ia" not in st.session_state:
 
 # --- BANCO DE DADOS LOCAL DO CHAT EXV (Sessão Ativa) ---
 if "chat_privado_salas" not in st.session_state:
-    st.session_state.chat_privado_salas = {} # ex: {"user1_user2": [{"remetente": "rafa", "tipo": "texto", "conteudo": "oi"}]}
+    st.session_state.chat_privado_salas = {} 
 if "chat_grupos" not in st.session_state:
-    st.session_state.chat_grupos = {} # ex: {"COD123": {"nome": "Grupo Dev", "mensagens": []}}
+    st.session_state.chat_grupos = {} 
 if "sala_privada_atual" not in st.session_state:
     st.session_state.sala_privada_atual = None
 if "codigo_grupo_atual" not in st.session_state:
@@ -271,13 +271,11 @@ elif aba_ativa == "🎥 Gravar/Postar":
                 st.success("Publicado no Feed!")
             except Exception as e: st.error(f"Erro ao publicar: {str(e)}")
 
-# --- 3. ABA CHAT EXV (MODIFICADO SEGUNDO REQUISITOS) ---
+# --- 3. ABA CHAT EXV ---
 elif aba_ativa == "💬 Chat EXV":
     st.title("💬 Chat EXV")
-    
     aba_dm, aba_grp = st.tabs(["🔒 Conversas Privadas (Salas)", "👥 Grupos por Código"])
     
-    # --- SUB-ABA: CHAT PRIVADO ---
     with aba_dm:
         try:
             todos_req = supabase.table("perfis_usuarios").select("username, nickname").execute()
@@ -285,17 +283,14 @@ elif aba_ativa == "💬 Chat EXV":
         except: lista_usuarios = []
         
         st.subheader("🔒 Suas Salas Privadas Ativas")
-        
-        # Selecionar usuário para abrir sala
         if lista_usuarios:
             opcoes_usuarios = {u['username']: f"{u['nickname']} (@{u['username']})" for u in lista_usuarios}
             usuario_selecionado = st.selectbox("Abrir sala privada com:", list(opcoes_usuarios.keys()), format_func=lambda x: opcoes_usuarios[x])
             
             if st.button("🚪 Entrar na Sala Privada", use_container_width=True):
                 st.session_state.sala_privada_atual = obter_id_sala_privada(user_atual.get('username'), usuario_selecionado)
-                st.session_state.codigo_grupo_atual = None # Desativa chat de grupo
+                st.session_state.codigo_grupo_atual = None
         
-        # Interface de dentro da sala privada ativa
         if st.session_state.sala_privada_atual:
             sala_id = st.session_state.sala_privada_atual
             outro_usuario = sala_id.replace(user_atual.get('username'), "").replace("_", "")
@@ -306,21 +301,13 @@ elif aba_ativa == "💬 Chat EXV":
             if sala_id not in st.session_state.chat_privado_salas:
                 st.session_state.chat_privado_salas[sala_id] = []
                 
-            # Renderizar histórico da sala
             for msg in st.session_state.chat_privado_salas[sala_id]:
-                alinhar = "right" if msg['remetente'] == user_atual.get('username') else "left"
-                cor = "#DDF" if msg['remetente'] == user_atual.get('username') else "#EEE"
-                
                 with st.chat_message("user" if msg['remetente'] == user_atual.get('username') else "assistant"):
                     st.markdown(f"**@{msg['remetente']}**")
-                    if msg['tipo'] == 'texto':
-                        st.write(msg['conteudo'])
-                    elif msg['tipo'] == 'foto':
-                        st.image(msg['conteudo'], caption="Foto enviada", width=250)
-                    elif msg['tipo'] == 'audio':
-                        st.audio(msg['conteudo'])
+                    if msg['tipo'] == 'texto': st.write(msg['conteudo'])
+                    elif msg['tipo'] == 'foto': st.image(msg['conteudo'], caption="Foto enviada", width=250)
+                    elif msg['tipo'] == 'audio': st.audio(msg['conteudo'])
             
-            # Caixa de ferramentas de envio da Sala Privada
             st.write("---")
             tipo_midia = st.radio("O que quer enviar?", ["📝 Mensagem", "🖼️ Link de Foto", "🎵 Link de Áudio"], horizontal=True)
             
@@ -344,10 +331,8 @@ elif aba_ativa == "💬 Chat EXV":
                 st.session_state.sala_privada_atual = None
                 st.rerun()
 
-    # --- SUB-ABA: CHAT EM GRUPO POR CÓDIGO ---
     with aba_grp:
         st.subheader("👥 Grupos Protegidos por Código")
-        
         cg1, cg2 = st.columns(2)
         with cg1:
             st.markdown("### Criar Novo Grupo")
@@ -356,7 +341,7 @@ elif aba_ativa == "💬 Chat EXV":
             if st.button("🏗️ Gerar Sala de Grupo", use_container_width=True):
                 if nome_novo_grp and cod_novo_grp:
                     st.session_state.chat_grupos[cod_novo_grp] = {"nome": nome_novo_grp, "mensagens": []}
-                    st.success(f"Grupo '{nome_novo_grp}' criado! Compartilhe o código para deixá-los entrar.")
+                    st.success(f"Grupo '{nome_novo_grp}' criado!")
                 else: st.warning("Preencha todos os campos do grupo.")
                 
         with cg2:
@@ -365,11 +350,10 @@ elif aba_ativa == "💬 Chat EXV":
             if st.button("🚪 Entrar no Grupo", use_container_width=True):
                 if cod_inserido in st.session_state.chat_grupos:
                     st.session_state.codigo_grupo_atual = cod_inserido
-                    st.session_state.sala_privada_atual = None # Desativa chat privado
+                    st.session_state.sala_privada_atual = None
                     st.success(f"Conectado ao grupo: {st.session_state.chat_grupos[cod_inserido]['nome']}")
                 else: st.error("Código de grupo incorreto ou inexistente!")
                 
-        # Interface interna do grupo ativo
         if st.session_state.codigo_grupo_atual:
             cod_g = st.session_state.codigo_grupo_atual
             dados_grupo = st.session_state.chat_grupos[cod_g]
@@ -446,7 +430,7 @@ elif aba_ativa == "🛒 Loja do Site":
                         else: st.error("❌ Saldo insuficiente!")
             st.write("---")
 
-# --- 6. ABA MEU PERFIL (ADICIONADA SEÇÃO DE SEGUIDORES COM CHAT DIRETO) ---
+# --- 6. ABA MEU PERFIL ---
 elif aba_ativa == "👤 Meu Perfil":
     meus_itens_perfil = user_atual.get('itens_exclusivos', [])
     if not isinstance(meus_itens_perfil, list): meus_itens_perfil = []
@@ -470,10 +454,8 @@ elif aba_ativa == "👤 Meu Perfil":
         c3.metric("Carteira", f"${user_atual.get('dinheiro', 0)}")
     
     st.write(f"📝 **Bio:** {user_atual.get('bio', 'Disponível')}")
-    
     st.write("---")
     
-    # --- SEÇÃO VER SEGUIDORES COM BOTÃO DE CONVERSA EXCLUSIVO ---
     exp_seg = st.expander("👥 Ver Meus Seguidores / Amigos")
     with exp_seg:
         st.write("Clique em um seguidor abaixo para abrir a função **Conversa com Seguidor**.")
@@ -485,10 +467,9 @@ elif aba_ativa == "👤 Meu Perfil":
                     st.write(f"👤 **@{amg}**")
                 with col_amg_btn:
                     if st.button(f"💬 Conversa com Seguidor", key=f"chat_seg_{amg}", use_container_width=True):
-                        # Define a sala e redireciona imediatamente para a aba de chat
                         st.session_state.sala_privada_atual = obter_id_sala_privada(user_atual.get('username'), amg)
                         st.session_state.codigo_grupo_atual = None
-                        st.success(f"Sala criada com @{amg}! Entre na aba '💬 Chat EXV' para conversar.")
+                        st.success(f"Sala configurada! Entre na aba '💬 Chat EXV' para conversar com @{amg}.")
         else: st.caption("Nenhum seguidor ou amigo adicionado ainda.")
     
     st.write("---")
@@ -540,14 +521,14 @@ elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
             if st.button("💬 Conversa com Seguidor", key="btn_conversa_direta_perfil", use_container_width=True):
                 st.session_state.sala_privada_atual = obter_id_sala_privada(user_atual.get('username'), alvo)
                 st.session_state.codigo_grupo_atual = None
-                st.success("Sala Privada configurada! Vá até a aba '💬 Chat EXV' para trocar mensagens, fotos e áudios.")
+                st.success("Sala Privada configurada! Vá até a aba '💬 Chat EXV' para conversar.")
                 
             if st.button("Voltar ao Feed"):
                 st.session_state.perfil_visitado = None
                 st.rerun()
     except: st.error("Erro ao carregar perfil.")
 
-# --- 8. PAINEL DEV ---
+# --- 8. PAINEL DEV (AGORA COMPLETO DE NOVO COM TUDO QUE VOCÊ PEDIU) ---
 elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_oficial":
     st.header("Painel Secreto do Desenvolvedor 👑")
     try:
@@ -563,23 +544,77 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
             st.subheader("👥 Seguidores")
             qtd_seguidores = st.number_input("Quantidade", min_value=0, value=1000)
             if st.button("Definir", key="btn_seg"):
-                try: supabase.table("perfis_usuarios").update({"seguidores": qtd_seguidores}).eq("username", usuario_alvo).execute(); st.rerun()
-                except: st.error("Erro na API.")
+                try: 
+                    supabase.table("perfis_usuarios").update({"seguidores": qtd_seguidores}).eq("username", usuario_alvo).execute()
+                    st.rerun()
+                except: st.error("Erro na API ao atualizar seguidores.")
         with col2:
             st.subheader("💰 Carteira")
             qtd_dinheiro = st.number_input("Dinheiro ($)", min_value=0, value=500)
             if st.button("Definir", key="btn_money"):
-                try: supabase.table("perfis_usuarios").update({"dinheiro": qtd_dinheiro}).eq("username", usuario_alvo).execute(); st.rerun()
-                except: st.error("Erro na API.")
+                try: 
+                    supabase.table("perfis_usuarios").update({"dinheiro": qtd_dinheiro}).eq("username", usuario_alvo).execute()
+                    st.rerun()
+                except: st.error("Erro na API ao atualizar carteira.")
         with col3:
             st.subheader("🎖️ Cargos")
             novo_titulo = st.selectbox("Cargo:", ["👑 Desenvolvedor", "⚔️ Vice-Dev", "📢 Divulgadora", "🧪 Tester", "🏅 best friends of the dev", "Usuário"])
             if st.button("Atualizar", key="btn_cargo"):
-                try: supabase.table("perfis_usuarios").update({"titulo": novo_titulo}).eq("username", usuario_alvo).execute(); st.rerun()
-                except: st.error("Erro na API.")
+                try: 
+                    supabase.table("perfis_usuarios").update({"titulo": novo_titulo}).eq("username", usuario_alvo).execute()
+                    st.rerun()
+                except: st.error("Erro na API ao mudar cargo.")
         with col4:
             st.subheader("🔨 Moderação")
             st.write("<br>", unsafe_allow_html=True)
             if st.button("🚫 Banir Usuário", key="btn_banir", use_container_width=True):
-                try: supabase.table("perfis_usuarios").update({"titulo": "❌ BANIDO"}).eq("username", usuario_alvo).execute(); st.rerun()
-                except: st.error("Erro na API.")
+                try: 
+                    supabase.table("perfis_usuarios").update({"titulo": "❌ BANIDO"}).eq("username", usuario_alvo).execute()
+                    st.success(f"@{usuario_alvo} banido!")
+                    st.rerun()
+                except Exception as e: st.error("Erro ao banir usuário no banco.")
+
+        # --- SEÇÃO DO GERENCIADOR DE INVENTÁRIO (INSERIDO COM SUCESSO) ---
+        st.write("---")
+        st.subheader("🎒 Gerenciador de Inventário (God Mode)")
+        item_para_dar = st.text_input("Nome do Item para dar ao usuário:", placeholder="Ex: 🖼️ Moldura de Fogo 🔥")
+        if st.button("🎁 Entregar Item para o Usuário", use_container_width=True):
+            if not item_para_dar: 
+                st.warning("Digite o nome de um item antes de enviar!")
+            else:
+                try:
+                    busca_user = supabase.table("perfis_usuarios").select("itens_exclusivos").eq("username", usuario_alvo).execute()
+                    if busca_user.data:
+                        inventario_atual = busca_user.data[0].get('itens_exclusivos', [])
+                        if not isinstance(inventario_atual, list): inventario_atual = []
+                        inventario_atual.append(item_para_dar)
+                        supabase.table("perfis_usuarios").update({"itens_exclusivos": inventario_atual}).eq("username", usuario_alvo).execute()
+                        st.success(f"🎉 '{item_para_dar}' injetado no inventário de @{usuario_alvo}!")
+                        st.rerun()
+                except Exception as e: st.error("Erro ao injetar item.")
+
+        # --- SEÇÃO DE AÇÕES GLOBAIS (INSERIDO COM SUCESSO) ---
+        st.write("---")
+        st.subheader("⚙️ Ações Globais")
+        col_glob1, col_glob2 = st.columns(2)
+        with col_glob1:
+            valor_bonus = st.number_input("Valor do Bônus Global:", min_value=1, value=100)
+            if st.button("💰 Dar Bônus para Todos", use_container_width=True):
+                try:
+                    todos = supabase.table("perfis_usuarios").select("username, dinheiro").execute()
+                    for u in todos.data:
+                        novo_saldo = u.get('dinheiro', 0) + valor_bonus
+                        supabase.table("perfis_usuarios").update({"dinheiro": novo_saldo}).eq("username", u['username']).execute()
+                    st.success("Bônus global enviado!")
+                    st.rerun()
+                except: st.error("Erro ao executar bônus global.")
+        with col_glob2:
+            st.write("<br>", unsafe_allow_html=True)
+            if st.button("🧹 APAGAR TODOS OS VÍDEOS", use_container_width=True):
+                try:
+                    vids = supabase.table("feed_videos").select("id").execute()
+                    for v in vids.data: 
+                        supabase.table("feed_videos").delete().eq("id", v['id']).execute()
+                    st.success("Feed limpo!")
+                    st.rerun()
+                except: st.error("Erro ao limpar feed de vídeos.")
