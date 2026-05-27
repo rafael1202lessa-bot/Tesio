@@ -44,26 +44,31 @@ def fazer_login(email, senha):
 
 def criar_conta(email, senha, username):
     try:
-        # Cria o usuário ignorando o envio e o limite de e-mails do provedor
-        auth_response = supabase.auth.admin_create_user({
+        # Usando a função oficial atualizada para criar a conta
+        auth_response = supabase.auth.sign_up({
             "email": email,
-            "password": senha,
-            "email_confirm": True
+            "password": senha
         })
-        user_id = auth_response.user.id
         
-        # Insere o nome de usuário na tabela de perfis
-        supabase.table("perfis").insert({"id": user_id, "username": username}).execute()
-        st.success("✨ Conta criada com sucesso! Mude para a aba '🔒 Entrar no Jogo' para jogar.")
+        if auth_response.user:
+            user_id = auth_response.user.id
+            # Insere o nome de usuário na tabela de perfis
+            supabase.table("perfis").insert({"id": user_id, "username": username}).execute()
+            st.success("✨ Conta criada com sucesso! Mude para a aba '🔒 Entrar no Jogo' usando os mesmos dados.")
+        else:
+            st.error("Erro desconhecido ao gerar usuário.")
     except Exception as e:
         st.error(f"Erro ao criar conta: {e}")
 
 def carregar_personagem(user_id):
-    resposta = supabase.table("personagens").select("*").eq("usuario_id", user_id).execute()
-    if resposta.data:
-        st.session_state.personagem = resposta.data[0]
-    else:
-        criar_personagem_padrao(user_id)
+    try:
+        resposta = supabase.table("personagens").select("*").eq("usuario_id", user_id).execute()
+        if resposta.data:
+            st.session_state.personagem = resposta.data[0]
+        else:
+            criar_personagem_padrao(user_id)
+    except Exception as e:
+        st.error(f"Erro ao carregar dados do herói: {e}")
 
 def criar_personagem_padrao(user_id):
     novo_p = {
@@ -82,15 +87,19 @@ def criar_personagem_padrao(user_id):
     try:
         insere = supabase.table("personagens").insert(novo_p).execute()
         st.session_state.personagem = insere.data[0]
+        st.rerun()
     except Exception as e:
-        st.error(f"Erro ao gerar herói: {e}")
+        st.error(f"Erro ao gerar herói básico: {e}")
 
 def salvar_progresso():
     p = st.session_state.personagem
-    supabase.table("personagens").update({
-        "hp_atual": p["hp_atual"], 
-        "ouro": p["ouro"]
-    }).eq("id", p["id"]).execute()
+    try:
+        supabase.table("personagens").update({
+            "hp_atual": p["hp_atual"], 
+            "ouro": p["ouro"]
+        }).eq("id", p["id"]).execute()
+    except Exception as e:
+        st.error(f"Erro ao salvar progresso: {e}")
 
 # =====================================================================
 # INTERFACE VISUAL (UI)
@@ -195,4 +204,3 @@ elif st.session_state.personagem:
         caixa_texto += log + "\n\n"
         
     st.text_area(label="Eventos recentes", value=caixa_texto, height=180, label_visibility="collapsed", disabled=True)
-            
