@@ -205,76 +205,145 @@ if user_atual.get('username') == "rafael_oficial":
 aba_ativa = st.radio("Menu", abas, horizontal=True)
 st.write("---")
 
-# --- 1. ABA FEED ---
+# --- 1. ABA FEED (COMPLETA: COMENTÁRIOS, VISUALIZAÇÕES E DELETAR) ---
 if aba_ativa == "📱 Feed":
-    st.title("📱 Silver Tok")
-    termo = st.text_input("🔍 Pesquisar no feed...", "").strip().lower()
+    st.title("📱 Feed de Vídeos")
+    
+    # Barra de pesquisa por legenda ou usuário
+    termo = st.text_input("🔍 Pesquisar vídeos por legenda ou usuário:", "").strip().lower()
     st.write("---")
     
     try:
-        req = supabase.table("feed_videos").select("*").order("id", desc=True).execute()
-        videos = req.data
-    except: videos = []
+        dados_feed = supabase.table("feed_videos").select("*").order("id", desc=True).execute()
+        videos = dados_feed.data if dados_feed else []
+    except Exception as e:
+        st.error(f"Erro ao carregar o Feed: {str(e)}")       
+        videos = []
+
+    if not videos:
+        st.info("Nenhum vídeo publicado ainda. Seja o primeiro a postar na aba 🎥 Gravar/Postar!")
 
     for vid in videos:
+        v_id = vid.get('id')
         v_username = vid.get('username', 'anonimo')
         v_nickname = vid.get('nickname', 'Usuário')
         v_legenda = vid.get('legenda', '')
-        v_url = vid.get('url_video', '')
+        v_url = vid.get('url', '')  
         v_curtidas = vid.get('curtidas', 0)
-        v_id = vid.get('id')
+        v_visualizacoes = vid.get('visualizacoes', 0)
+        
+        # Filtro de busca por termo
+        if not termo or termo in str(v_legenda).lower() or termo in str(v_username).lower() or termo in str(v_nickname).lower():
+            
+            # --- CONTADOR DE VISUALIZAÇÕES REAL ---
+            # Sempre que o post é renderizado, incrementa 1 visualização no banco de dados
+            if f"visto_{v_id}" not in st.session_state:
+                st.session_state[f"visto_{v_id}"] = True
+                try:
+                    supabase.table("feed_videos").update({"visualizacoes": v_visualizacoes + 1}).eq("id", v_id).execute()
+                    v_visualizacoes += 1 # Atualiza na tela imediatamente
+                except:
+                    pass
 
-        if not termo or termo in v_legenda.lower() or termo in v_username.lower() or termo in v_nickname.lower():
             with st.container():
-                foto_autor = "https://img.icons8.com/colors/150/test-account.png"
-                titulo_autor = "Usuário"
-                itens_autor = []
-                seg_autor = 0
+                # Obter dados do perfil do autor do vídeo (Foto, Selos, etc.)
+                foto_autor, titulo_autor, itens_autor, seg_autor = "https://img.icons8.com/colors/150/test-account.png", "Usuário", [], 0
                 try:
                     autor_req = supabase.table("perfis_usuarios").select("*").eq("username", v_username).execute()
                     if autor_req.data:
                         foto_autor = autor_req.data[0].get('foto_perfil', foto_autor)
-                        if not foto_autor or str(foto_autor).strip() in ["0", "None", ""]:
+                        if not foto_autor or str(foto_autor).strip() in ["0", "None", ""]: 
                             foto_autor = "https://img.icons8.com/colors/150/test-account.png"
                         titulo_autor = autor_req.data[0].get('titulo', 'Usuário')
                         itens_autor = autor_req.data[0].get('itens_exclusivos', [])
                         seg_autor = autor_req.data[0].get('seguidores', 0)
-                except: pass
+                except: 
+                    pass
                 
                 selo_post, moldura_post = aplicar_moldura_e_selo(v_username, titulo_autor, itens_autor, seg_autor)
                 
+                # Cabeçalho do criador do post
                 col_foto, col_nome = st.columns([1, 5])
-                with col_foto:
+                with col_foto: 
                     st.markdown(f'<img src="{foto_autor}" style="{moldura_post}" width="50">', unsafe_allow_html=True)
                 with col_nome:
                     if st.button(f"**{v_nickname}** (@{v_username}){selo_post}", key=f"u_{v_id}"):
                         st.session_state.perfil_visitado = v_username
                         st.rerun()
                 
-                if v_legenda: st.write(v_legenda)
+                # Conteúdo do vídeo e legenda
+                if v_legenda: 
+                    st.write(v_legenda)
                 if v_url:
-                    try: st.video(v_url)
-                    except: st.error("Vídeo indisponível.")
+                    try: 
+                        st.video(v_url)
+                    except: 
+                        st.error("Vídeo indisponível.")
                 
+                # Exibição de métricas (Visualizações e Curtidas)
+                st.caption(f"👁️ {v_visualizacoes} visualizações")
+                
+                # Botões de Ação Principais
                 c1, c2, c3 = st.columns(3)
                 with c1:
                     if st.button(f"❤️ {v_curtidas}", key=f"l_{v_id}", use_container_width=True):
                         try:
                             supabase.table("feed_videos").update({"curtidas": v_curtidas + 1}).eq("id", v_id).execute()
                             st.rerun()
-                        except: st.error("Erro ao curtir.")
-                with c2: st.button("🔗 Copiar", key=f"s_{v_id}", use_container_width=True)
-                with c3: abrir_comentarios = st.checkbox("💬 Comentários", key=f"tab_c_{v_id}")
+                        except: 
+                            pass
+                with c2: 
+                    st.button("🔗 Copiar", key=f"s_{v_id}", use_container_width=True)
+                with c3: 
+                    abrir_comentarios = st.checkbox("💬 Comentários", key=f"tab_c_{v_id}")
                 
-                if abrir_comentarios: st.write("**@rafael_oficial:** Esse vídeo ficou brabo! 🔥")
+                # --- SEÇÃO DE COMENTÁRIOS REAL ---
+                if abrir_comentarios:
+                    st.write("---")
+                    st.write("### 💬 Comentários")
+                    
+                    # Carrega os comentários salvos para este vídeo específico
+                    try:
+                        coments_req = supabase.table("comentarios_videos").select("*").eq("video_id", v_id).order("id", desc=False).execute()
+                        lista_comentarios = coments_req.data if coments_req else []
+                    except:
+                        lista_comentarios = []
+                        
+                    if not lista_comentarios:
+                        st.caption("Nenhum comentário ainda. Seja o primeiro a comentar!")
+                    else:
+                        for c in lista_comentarios:
+                            st.markdown(f"**{c.get('nickname')}** (@{c.get('username')}): {c.get('comentario')}")
+                    
+                    # Campo de texto para enviar um novo comentário real
+                    novo_comentario = st.text_input("Escreva um comentário...", key=f"input_c_{v_id}")
+                    if st.button("Enviar Comentário", key=f"btn_c_{v_id}"):
+                        if novo_comentario.strip():
+                            try:
+                                supabase.table("comentarios_videos").insert({
+                                    "video_id": v_id,
+                                    "username": user_atual.get('username'),
+                                    "nickname": user_atual.get('nickname'),
+                                    "comentario": novo_comentario.strip()
+                                }).execute()
+                                st.success("Comentário enviado!")
+                                st.rerun()
+                            except Exception as err:
+                                st.error(f"Erro ao comentar: {str(err)}")
                 
+                # --- SISTEMA DE EXCLUSÃO DE VÍDEO SEGURO ---
+                # O botão de apagar só aparece se você for o dono do post ou se for o administrador ("rafael_oficial")
                 if user_atual.get('username') == v_username or user_atual.get('username') == "rafael_oficial":
-                    if st.button(f"🗑️ Apagar Vídeo", key=f"d_{v_id}", use_container_width=True):
+                    st.write("")
+                    if st.button(f"🗑️ Apagar Meu Vídeo", key=f"d_{v_id}", use_container_width=True):
                         try:
+                            # Remove do Supabase e o Cascade cuidará de apagar os comentários vinculados a ele
                             supabase.table("feed_videos").delete().eq("id", v_id).execute()
+                            st.success("Vídeo removido com sucesso!")
                             st.rerun()
-                        except: st.error("Erro ao apagar.")
-                st.write("---")
+                        except Exception as err: 
+                            st.error(f"Erro ao apagar: {str(err)}")
+                            st.write("---")
 
 # --- 2. ABA GRAVAR/POSTAR (ESTÚDIO COM CENTRAL DA LIVE + LIVE PIX TTS) ---
 elif aba_ativa == "🎥 Gravar/Postar":
