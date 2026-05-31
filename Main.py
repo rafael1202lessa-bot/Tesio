@@ -859,23 +859,25 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
                     # ID do item para usar como chave única no banco e no Streamlit
                     id_item = item.get("id")
                     
-                    if esta_ativo:
+                      if esta_ativo:
                         if st.button("Remover", key=f"dev_rem_{id_item}", use_container_width=True):
+                            # ISSO VAI MOSTRAR OS DADOS DO ITEM CLICADO NO ECRÃ
+                            st.write("📋 ID do item clicado:", id_item)
                             try:
-                                # CORREÇÃO: Filtrando direto pelo ID para garantir que remova na hora!
-                                supabase.table("loja_itens").update({"ativo": False}).eq("id", id_item).execute()
+                                resultado = supabase.table("loja_itens").update({"ativo": False}).eq("id", id_item).execute()
+                                st.write("✅ Resposta do Banco:", resultado)
                                 st.success("Item removido com sucesso!")
                                 st.rerun()
                             except Exception as erro: 
-                                st.error(f"Erro: {erro}")
+                                st.error(f"🚨 Erro do Supabase: {erro}")
                     else:
                         if st.button("Ativar", key=f"dev_atv_{id_item}", use_container_width=True):
                             try:
-                                # CORREÇÃO: Filtrando direto pelo ID para garantir que ative na hora!
-                                supabase.table("loja_itens").update({"ativo": True}).eq("id", id_item).execute()
+                                resultado = supabase.table("loja_itens").update({"ativo": True}).eq("id", id_item).execute()
                                 st.success("Item reativado com sucesso!")
                                 st.rerun()
                             except Exception as erro: 
-                                st.error(f"Erro: {erro}")
+                                st.error(f"🚨 Erro do Supabase: {erro}")
+            
             st.write("---")
     
