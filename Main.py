@@ -566,8 +566,7 @@ elif aba_ativa == "🛒 Loja do Site":
                             else: 
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
-            
-# --- 6. ABA MEU PERFIL ---
+ # --- 6. ABA MEU PERFIL ---           
 elif aba_ativa == "👤 Perfil":
     foto_url = user_atual.get('foto_perfil') or "https://via.placeholder.com/150"
     nome_exibir = user_atual.get('nickname') or user_atual.get('username') or "Rafael"
