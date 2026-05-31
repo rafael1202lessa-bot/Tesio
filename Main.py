@@ -346,54 +346,124 @@ if aba_ativa == "📱 Feed":
                             st.write("---")
 
 # --- 2. ABA GRAVAR/POSTAR (ESTÚDIO COM CENTRAL DA LIVE + LIVE PIX TTS) ---
-elif aba_ativa == "🎥 Gravar/Postar":
+elif aba_active == "🎥 Gravar/Postar":
     st.title("🎥 Estúdio de Criação & Live")
     
+    # Criando as abas organizadas com as funcionalidades completas
     aba_upload, aba_link, aba_live = st.tabs([
         "📁 Enviar Vídeo Gravado", 
         "🔗 Postar por Link", 
         "🔴 Central do Streamer (Sua Live)"
     ])
     
+    # ----------------------------------------------------------
+    # 📁 ABA 1: UPLOAD REAL DE VÍDEO (Persistido no Supabase Storage)
+    # ----------------------------------------------------------
     with aba_upload:
-        st.subheader("Suba um vídeo da sua galeria")
-        legenda_upload = st.text_input("Legenda do seu vídeo:", key="leg_up")
-        video_arquivo = st.file_uploader("Selecione o arquivo de vídeo", type=["mp4", "mov", "avi", "webm"])
+        st.subheader("📁 Enviar Vídeo da Galeria")
+        legenda_upload = st.text_input("Legenda do post:", key="leg_upload")
+        arquivo_video = st.file_uploader("Selecione um arquivo de vídeo (.mp4, .mov, .avi):", type=["mp4", "mov", "avi"])
         
-        if st.button("🚀 Publicar Vídeo Gravado", use_container_width=True):
-            if not video_arquivo: st.warning("Selecione um arquivo primeiro!")
-            else: st.success("Vídeo processado! Integre com o Supabase Storage Bucket para persistência completa.")
-                    
-    with aba_link:
-        legenda = st.text_input("Legenda do post:", key="leg_link")
-        url_do_video = st.text_input("Link do vídeo (.mp4):", key="url_mp4")
-        if st.button("Publicar Vídeo por Link", use_container_width=True):
-            if not url_do_video: st.warning("Insira o link do vídeo.")
+        if st.button("🚀 Publicar Vídeo da Galeria", use_container_width=True):
+            if arquivo_video is not None:
+                try:
+                    with st.spinner("Enviando o vídeo para o servidor... Aguarde. ⏳"):
+                        # Define um nome único baseado no usuário e arquivo
+                        nome_do_arquivo = f"{user_atual.get('username')}_{arquivo_video.name}"
+                        dados_do_video = arquivo_video.read()
+                        
+                        # Upload para o Bucket "videos_feed"
+                        supabase.storage.from_("videos_feed").upload(
+                            path=nome_do_arquivo, 
+                            file=dados_do_video, 
+                            file_options={"content-type": "video/mp4"}
+                        )
+                        
+                        # Pega a URL pública gerada
+                        url_publica = supabase.storage.from_("videos_feed").get_public_url(nome_do_arquivo)
+                        
+                        # Insere o registro na tabela de feed
+                        supabase.table("feed_videos").insert({
+                            "usuario": user_atual.get('username'), 
+                            "video_url": url_publica, 
+                            "legenda": legenda_upload.strip(),
+                            "curtidas": 0,
+                            "visualizacoes": 0
+                        }).execute()
+                        
+                        st.success("Vídeo publicado com sucesso no Feed! 🎉")
+                        st.rerun()
+                except Exception as e:
+                    st.error(f"Erro ao fazer upload: {str(e)}")
             else:
+                st.warning("Por favor, selecione um arquivo de vídeo antes de publicar.")
+
+    # ----------------------------------------------------------
+    # 🔗 ABA 2: POSTAR POR LINK DIRETO
+    # ----------------------------------------------------------
+    with aba_link:
+        st.subheader("🔗 Publicar Vídeo por URL externa")
+        legenda_link = st.text_input("Legenda do post:", key="leg_link")
+        url_link = st.text_input("Link do vídeo (.mp4):", key="url_link")
+            
+        if st.button("Publicar Vídeo por Link", use_container_width=True):
+            if url_link.strip():
                 try:
                     supabase.table("feed_videos").insert({
-                        "username": user_atual.get('username'), "nickname": user_atual.get('nickname'),
-                        "legenda": legenda, "url_video": url_do_video, "curtidas": 0
+                        "usuario": user_atual.get('username'),
+                        "video_url": url_link.strip(),
+                        "legenda": legenda_link.strip(),
+                        "curtidas": 0,
+                        "visualizacoes": 0
                     }).execute()
-                    st.success("Publicado no Feed!")
-                except Exception as e: st.error(f"Erro ao publicar: {str(e)}")
-                    
+                    st.success("Vídeo publicado com sucesso por link!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Erro ao salvar: {str(e)}")
+            else:
+                st.warning("Por favor, insira o link do vídeo.")
+
+    # ----------------------------------------------------------
+    # 🔴 ABA 3: CENTRAL DO STREAMER (Com Banco Global + Live Pix)
+    # ----------------------------------------------------------
     with aba_live:
         st.subheader("📹 Painel de Controle de Transmissão")
         
+        # Inicializa variáveis de estado essenciais para evitar quebras de NameError
+        if 'live_ativa' not in st.session_state: st.session_state.live_ativa = False
+        if 'live_chat' not in st.session_state: st.session_state.live_chat = []
+        if 'live_alertas' not in st.session_state: st.session_state.live_alertas = []
+
         if not st.session_state.live_ativa:
-            titulo_live = st.text_input("Título da sua Live:", placeholder="Ex: Jogando com inscritos! 🔥")
-            if st.button("🔴 INICIAR LIVE", use_container_width=True):
+            titulo_live = st.text_input("Título da sua Live:", placeholder="Ex: Programando o Silver Tok v2! 🔥")
+            if st.button("🔴 INICIAR LIVE GLOBAL", use_container_width=True):
                 if titulo_live:
-                    st.session_state.live_ativa = True
-                    st.session_state.live_chat = [{"remetente": "Sistema", "conteudo": f"Sua live '{titulo_live}' foi iniciada!"}]
-                    st.session_state.live_alertas = []
-                    st.rerun()
-                else: st.warning("Insira um título para começar.")
+                    try:
+                        # Limpa qualquer sessão antiga e cria a nova transmissão global aberta ao público
+                        supabase.table("lives_ativas").delete().eq("streamer_username", user_atual.get('username')).execute()
+                        supabase.table("lives_ativas").insert({
+                            "streamer_username": user_atual.get('username'), 
+                            "streamer_nickname": user_atual.get('nickname'), 
+                            "titulo_live": titulo_live, 
+                            "status": "online"
+                        }).execute()
+                        
+                        st.session_state.live_ativa = True
+                        st.session_state.live_chat = [{"remetente": "Sistema", "conteudo": f"Sua live '{titulo_live}' está pública no feed global!"}]
+                        st.session_state.live_alertas = []
+                        st.rerun()
+                    except Exception as e: 
+                        st.error(f"Erro ao abrir transmissão: {str(e)}")
+                else:
+                    st.warning("Por favor, insira um título para a sua live.")
         else:
-            st.success("🎥 VOCÊ ESTÁ AO VIVO!")
+            st.success("🎥 VOCÊ ESTÁ AO VIVO NO FEED GLOBAL!")
             if st.button("⏹️ Encerrar Transmissão", use_container_width=True):
                 st.session_state.live_ativa = False
+                try: 
+                    supabase.table("lives_ativas").delete().eq("streamer_username", user_atual.get('username')).execute()
+                except: 
+                    pass
                 st.rerun()
             
             st.write("---")
@@ -401,7 +471,6 @@ elif aba_ativa == "🎥 Gravar/Postar":
             
             with col_video_retorno:
                 st.markdown("### 🖥️ Retorno do seu Vídeo")
-                # Exibe a câmera do desenvolvedor na tela para ver o próprio enquadramento
                 st.camera_input("Monitor da Câmera", key="monitor_live_cam")
                 
                 st.markdown("### 🪙 Últimos Alertas Live Pix (Voz Alta)")
@@ -411,12 +480,12 @@ elif aba_ativa == "🎥 Gravar/Postar":
             with col_chat_live:
                 st.markdown("### 💬 Chat da Live")
                 
-                # Container scannável de chat da transmissão
-                with st.container(border=True, height=250):
-                    for msg_l in st.session_state.live_chat:
+                # Exibição scannável do histórico de mensagens
+                with st.container(border=True, height=220):
+                    for msg_l in st.session_state.live_chat: 
                         st.write(f"**@{msg_l['remetente']}:** {msg_l['conteudo']}")
                 
-                # Simulador de Interatividade da audiência (Para o Dev testar o Live Pix)
+                # Simulador Interativo Dev para Testar Alertas e Chat
                 st.write("---")
                 st.caption("🧪 Simulador de Público (Modo Dev)")
                 sim_user = st.text_input("Usuário do fã:", value="seguidor_vip_01", key="sim_u")
@@ -432,14 +501,11 @@ elif aba_ativa == "🎥 Gravar/Postar":
                     sim_coins = st.number_input("Moedas:", min_value=10, value=50, step=10)
                     if st.button("🎁 Simular Silver Coins", use_container_width=True):
                         if sim_txt:
-                            # Adiciona no chat
                             texto_completo_alerta = f"Enviou {sim_coins} Silver Coins! Mensagem: {sim_txt}"
                             st.session_state.live_chat.append({"remetente": sim_user, "conteudo": f"⭐ {texto_completo_alerta}"})
-                            
-                            # Registra o alerta estruturado
                             st.session_state.live_alertas.append({"usuario": sim_user, "moedas": sim_coins, "msg": sim_txt})
                             
-                            # DISPARA A LEITURA EM VOZ ALTA DO LIVE PIX
+                            # Dispara a função tts nativa do seu app para ler o alerta
                             texto_leitura = f"{sim_user} enviou {sim_coins} Silver Coins. {sim_txt}"
                             emitir_alerta_voz(texto_leitura)
                             st.rerun()
