@@ -566,128 +566,7 @@ elif aba_ativa == "🛒 Loja do Site":
                             else: 
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
- # ==========================================
-# --- 6. ABA MEU PERFIL (VERSÃO NOVA) ---
-# ==========================================
-# NOTA: Garanta que "👤 Perfil" esteja escrito IGUALZINHO no seu menu principal!
-elif aba_ativa and "Perfil" in aba_ativa:
-    
-    # 1. GARANTIA DE DADOS (Evita tela branca e NameError)
-    if 'user_atual' not in locals() and 'user_atual' not in globals():
-        user_atual = st.session_state.get('user_atual', st.session_state.get('usuario', {}))
-    
-    if not user_atual:
-        user_atual = {
-            "nickname": "Rafael",
-            "username": "rafael_dev",
-            "cargo": "👑 DEV",
-            "bio": "Configurando o Silver Tok...",
-            "foto_perfil": "https://via.placeholder.com/150",
-            "seguidores": 0,
-            "seguindo": 0,
-            "itens_exclusivos": []
-        }
-
-    # 2. EXTRAÇÃO SEGURA DE VARIÁVEIS
-    foto_url = user_atual.get('foto_perfil') or "https://via.placeholder.com/150"
-    nome_exibir = user_atual.get('nickname') or user_atual.get('username') or "Rafael"
-    cargo = user_atual.get('cargo') or "Membro"
-    bio = user_atual.get('bio') or "Sem bio definida."
-    seguidores_count = user_atual.get('seguidores', 0)
-    seguindo_count = user_atual.get('seguindo', 0)    # ==========================================
-    
-
-        # ==========================================
-    # --- 3. DESIGN DO BANNER PREMIUM (COM MEMÓRIA) ---
-    # ==========================================
-    
-    # 🎫 CÁTALOGO DE MOLDURAS DO SILVER TOK
-    catalogo_molduras = {
-        "Moldura angelical": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura-anjo.png",
-        "Moldura Cyberpunk": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_cyber.png"
-    }
-
-    # Garante de forma segura que a variável da foto exista sem quebrar o app
-    if 'foto_url' not in locals() and 'foto_url' not in globals():
-        foto_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8qZMmUOxgkcCJpyzdnLeVv-o5IJ3MAIN4R-pn6K5rNuc61y3dfVbGQ5s&s=10"
-
-    # --- INICIALIZAÇÃO DA MEMÓRIA DO STREAMLIT ---
-    # Se o usuário não tem nada no inventário da sessão ainda, começamos com a moldura disponível para teste
-    if 'meus_itens_perfil' not in st.session_state:
-        # Se a variável global existia e tinha itens, usamos ela, senão criamos com a moldura para você testar
-        if 'meus_itens_perfil' in locals() or 'meus_itens_perfil' in globals():
-            st.session_state.meus_itens_perfil = meus_itens_perfil if meus_itens_perfil else ["[EQUIPADO] Moldura angelical"]
-        else:
-            st.session_state.meus_itens_perfil = ["[EQUIPADO] Moldura angelical"]
-
-    # Sincroniza a variável que o restante do seu script usa com a memória estável do Streamlit
-    meus_itens_perfil = st.session_state.meus_itens_perfil
-
-    # Identifica dinamicamente se há uma moldura equipada
-    link_moldura = None
-    for item in meus_itens_perfil:
-        if "[EQUIPADO]" in item and "Moldura" in item:
-            nome_da_moldura = item.replace("[EQUIPADO] ", "")
-            link_moldura = catalogo_molduras.get(nome_da_moldura)
-
-    # HTML definitivo com alinhamento cirúrgico de moldura
-    if link_moldura:
-        st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: -29px; left: -28px; pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
-    else:
-        st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);"></div>', unsafe_allow_html=True)
-        
-    # 4. INFORMAÇÕES DO PERFIL
-    st.title(f"{nome_exibir} ✨ [👑 DEV]")
-    st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {cargo}")
-    st.write(f"*{bio}*")
-    
-    # Contadores de Seguidores
-    st.markdown(f"**👥 {seguidores_count}** Seguidores │ **👤 {seguindo_count}** Seguindo")
-    st.markdown("---")
-
-    # 5. SUB-ABAS DO PERFIL
-    sub_aba_inventario, sub_aba_editar, sub_aba_convites, sub_aba_amigos = st.tabs([
-        "🎒 Meu Inventário", 
-        "⚙️ Editar Perfil", 
-        "✉️ Convites", 
-        "👥 Amigos"
-    ])
-    
-    # --- SUB-ABA 1: INVENTÁRIO ---
-        # --- SUB-ABA 1: INVENTÁRIO (VERSÃO CORRIGIDA) ---
-    with sub_aba_inventario:
-        if meus_itens_perfil:
-            # Filtra itens equipados sem duplicar
-            itens_exib = list(set([i.replace("[EQUIPADO] ", "") for i in meus_itens_perfil if i]))
-            for it in itens_exib:
-                col_n, col_a = st.columns([3, 1])
-                eq = f"[EQUIPADO] {it}" in meus_itens_perfil
-                
-                with col_n: 
-                    st.markdown(f"🟢 **{it}**" if eq else f"⚪ {it}")
-                
-                with col_a:
-                    if eq:
-                        if st.button("Desequipar", key=f"d_{it}", use_container_width=True):
-                            nl = [x for x in meus_itens_perfil if x != f"[EQUIPADO] {it}"]
-                            if it not in nl: nl.append(it)
-                            
-                            # 1. Atualiza no Banco de Dados
-                            supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
-                            
-                            # 2. Força a atualização na memória local para mudar na hora
-                            user_atual["itens_exclusivos"] = nl
-                            st.session_state['user_atual'] = user_atual
-                            st.session_state['usuario'] = user_atual
-                            st.rerun()
-                    else:
-                        if st.button("Equipar", key=f"e_{it}", use_container_width=True):
-                            nl = []
-                            for x in meus_itens_perfil:
-                                # Se for outra moldura equipada, desequipa para colocar a nova
-                                if "Moldura" in x and "[EQUIPADO]" in x and "Moldura" in it:
-                                    nl.append(x.replace("[EQUIPADO] ", ""))
-# --- 6. ABA MEU PERFIL (SISTEMA PREMIUM ADAPTADO) ---
+     # --- 6. ABA MEU PERFIL (SINCRONIZADO COM SUPABASE) ---
 elif aba_ativa == "👤 Meu Perfil":
     # 🎫 CÁTALOGO DE MOLDURAS EXCLUSIVAS
     catalogo_molduras = {
@@ -695,41 +574,45 @@ elif aba_ativa == "👤 Meu Perfil":
         "Moldura Cyberpunk": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_cyber.png"
     }
 
-    # 1. Recupera e limpa a lista de itens originais do banco de dados
-    itens_banco = user_atual.get('itens_exclusivos', [])
-    if not isinstance(itens_banco, list): 
-        itens_banco = []
-    itens_banco = [x for x in itens_banco if x]
+    # 1. BUSCA FRESCA NO BANCO: Força o app a ler o inventário direto do Supabase para pegar compras novas
+    try:
+        dados_frescos = supabase.table("perfis_usuarios").select("itens_exclusivos, foto_perfil").eq("username", user_atual.get('username')).execute()
+        if dados_frescos.data:
+            meus_itens_perfil = dados_frescos.data[0].get('itens_exclusivos', [])
+            foto_url = dados_frescos.data[0].get('foto_perfil', '')
+        else:
+            meus_itens_perfil = user_atual.get('itens_exclusivos', [])
+            foto_url = user_atual.get('foto_perfil', '')
+    except Exception:
+        meus_itens_perfil = user_atual.get('itens_exclusivos', [])
+        foto_url = user_atual.get('foto_perfil', '')
 
-    # 2. SINCRONIZADOR DE MEMÓRIA (Sessão estável para os botões funcionarem na hora)
-    if 'meus_itens_perfil' not in st.session_state:
-        st.session_state.meus_itens_perfil = itens_banco
-    
-    meus_itens_perfil = st.session_state.meus_itens_perfil
+    # Limpeza de segurança na lista
+    if not isinstance(meus_itens_perfil, list): 
+        meus_itens_perfil = []
+    meus_itens_perfil = [x for x in meus_itens_perfil if x]
 
-    # 3. IDENTIFICAÇÃO DINÂMICA DA MOLDURA ATIVA
+    # 2. IDENTIFICAÇÃO DINÂMICA DA MOLDURA ATIVA
     link_moldura = None
     for item in meus_itens_perfil:
         if "[EQUIPADO]" in item and "Moldura" in item:
             nome_da_moldura = item.replace("[EQUIPADO] ", "")
             link_moldura = catalogo_molduras.get(nome_da_moldura)
 
-    # 4. TRATAMENTO SEGURO DA URL DA FOTO DE PERFIL
-    foto_url = user_atual.get('foto_perfil', '')
+    # Tratamento da URL da foto de perfil
     if not foto_url or str(foto_url).strip() in ["0", "None", ""]: 
         foto_url = "https://img.icons8.com/colors/150/test-account.png"
 
     # ==========================================================
-    # --- NOVO BLOCO 3: DESIGN DO BANNER ULTRA-ALINHADO ---
+    # --- RENDERIZAÇÃO DO BANNER PREMIUM ---
     # ==========================================================
     if link_moldura:
         st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: -29px; left: -28px; pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);"></div>', unsafe_allow_html=True)
 
-    # 5. ESTRUTURA DE STATUS DO USUÁRIO (Abaixo do Banner)
+    # 3. STATUS DO USUÁRIO
     selo_meu_perfil, _ = aplicar_moldura_e_selo(user_atual.get('username'), user_atual.get('titulo'), meus_itens_perfil, user_atual.get('seguidores', 0))
-    
     st.header(f"{user_atual.get('nickname', 'Usuário')}{selo_meu_perfil}")
     st.caption(f"🆔 **@{user_atual.get('username', '')}** | Cargo: *{user_atual.get('titulo', 'Usuário')}*")
     
@@ -737,20 +620,19 @@ elif aba_ativa == "👤 Meu Perfil":
     m1.metric("Seguidores", f"👥 {user_atual.get('seguidores', 0)}")
     m2.metric("Seguindo", f"🏃 {user_atual.get('seguindo', 0)}")
     m3.metric("Saldo", f"🪙 {user_atual.get('dinheiro', 0)}")
-    
     st.write("---")
     
-    # 6. ABAS INTERNAS
+    # 4. ABAS INTERNAS
     sub_aba_perfil, sub_aba_inventario, sub_aba_editar, sub_aba_convites, sub_aba_seguidores = st.tabs(["📋 Meus Dados", "🎒 Meu Inventário", "⚙️ Editar Perfil", "✉️ Convites", "👥 Amigos"])
     
     with sub_aba_perfil:
         st.subheader("📋 Informações da Conta")
         st.markdown(f"**Bio atual:** {user_atual.get('bio', '*Nenhuma biografia adicionada.*')}")
 
-    # 7. SISTEMA DE INVENTÁRIO CORRIGIDO COM ESTADO E BANCO DE DADOS
+    # 5. INVENTÁRIO ATUALIZADO EM TEMPO REAL
     with sub_aba_inventario:
         if meus_itens_perfil:
-            # Filtra e limpa a lista para exibição visual
+            # Exibe os itens sem repetir e sem a tag de equipado no nome
             itens_exib = list(set([i.replace("[EQUIPADO] ", "") for i in meus_itens_perfil if i]))
             for it in itens_exib:
                 col_n, col_a = st.columns([3, 1])
@@ -760,30 +642,31 @@ elif aba_ativa == "👤 Meu Perfil":
                 with col_a:
                     if eq:
                         if st.button("Desequipar", key=f"d_{it}", use_container_width=True):
-                            # Remove o marcador de equipado e joga o item limpo de volta na lista
+                            # Monta a nova lista sem o marcador de equipado
                             nl = [x for x in meus_itens_perfil if x != f"[EQUIPADO] {it}"]
                             if it not in nl: 
                                 nl.append(it)
-                            # Atualiza a memória local e o Supabase
-                            st.session_state.meus_itens_perfil = nl
+                            # Salva direto no Supabase e limpa o cache da sessão
                             supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                            if 'meus_itens_perfil' in st.session_state:
+                                del st.session_state['meus_itens_perfil']
                             st.rerun()
                     else:
                         if st.button("Equipar", key=f"e_{it}", use_container_width=True):
                             nl = []
-                            # Se for uma Moldura, limpa qualquer outra moldura que já estava equipada antes
+                            # Se equipar moldura, desequipa as outras molduras antes
                             for x in meus_itens_perfil:
                                 if "Moldura" in it and "Moldura" in x and "[EQUIPADO]" in x:
                                     nl.append(x.replace("[EQUIPADO] ", ""))
                                 else:
                                     nl.append(x)
-                            # Adiciona o novo status de Equipado
                             if it in nl: 
                                 nl.remove(it)
                             nl.append(f"[EQUIPADO] {it}")
-                            # Atualiza a memória local e o Supabase
-                            st.session_state.meus_itens_perfil = nl
+                            # Salva direto no Supabase e limpa o cache da sessão
                             supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                            if 'meus_itens_perfil' in st.session_state:
+                                del st.session_state['meus_itens_perfil']
                             st.rerun()
         else:
             st.info("Inventário vazio.")
@@ -821,7 +704,7 @@ elif aba_ativa == "👤 Meu Perfil":
                     supabase.table("perfis_usuarios").update({"lista_amigos": la, "seguindo": user_atual.get('seguindo', 0) + 1}).eq("username", user_atual.get('username')).execute()
                     st.success("Seguindo!")
                     st.rerun()
-                    
+              
 # --- 7. ABA VISITAR PERFIL ALHEIO ---
 if aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visited:
     alvo = st.session_state.perfil_visitado
