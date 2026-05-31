@@ -597,8 +597,8 @@ elif aba_ativa and "Perfil" in aba_ativa:
     seguindo_count = user_atual.get('seguindo', 0)    # ==========================================
     
 
-    # ==========================================
-    # --- 3. DESIGN DO BANNER PREMIUM (PRODUÇÃO) ---
+        # ==========================================
+    # --- 3. DESIGN DO BANNER PREMIUM (COM MEMÓRIA) ---
     # ==========================================
     
     # 🎫 CÁTALOGO DE MOLDURAS DO SILVER TOK
@@ -611,11 +611,19 @@ elif aba_ativa and "Perfil" in aba_ativa:
     if 'foto_url' not in locals() and 'foto_url' not in globals():
         foto_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8qZMmUOxgkcCJpyzdnLeVv-o5IJ3MAIN4R-pn6K5rNuc61y3dfVbGQ5s&s=10"
 
-    # SISTEMA DINÂMICO: Se 'meus_itens_perfil' não existir na memória, criamos vazio para não quebrar os outros botões do app
-    if 'meus_itens_perfil' not in locals() and 'meus_itens_perfil' not in globals():
-        meus_itens_perfil = []
+    # --- INICIALIZAÇÃO DA MEMÓRIA DO STREAMLIT ---
+    # Se o usuário não tem nada no inventário da sessão ainda, começamos com a moldura disponível para teste
+    if 'meus_itens_perfil' not in st.session_state:
+        # Se a variável global existia e tinha itens, usamos ela, senão criamos com a moldura para você testar
+        if 'meus_itens_perfil' in locals() or 'meus_itens_perfil' in globals():
+            st.session_state.meus_itens_perfil = meus_itens_perfil if meus_itens_perfil else ["[EQUIPADO] Moldura angelical"]
+        else:
+            st.session_state.meus_itens_perfil = ["[EQUIPADO] Moldura angelical"]
 
-    # Identifica dinamicamente se há uma moldura equipada de verdade no inventário
+    # Sincroniza a variável que o restante do seu script usa com a memória estável do Streamlit
+    meus_itens_perfil = st.session_state.meus_itens_perfil
+
+    # Identifica dinamicamente se há uma moldura equipada
     link_moldura = None
     for item in meus_itens_perfil:
         if "[EQUIPADO]" in item and "Moldura" in item:
