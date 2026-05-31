@@ -17,7 +17,7 @@ except Exception as e:
 # st.stop()
 
 # --- ESTADO DE DESENVOLVIMENTO ---
-ESTADO_DESENVOLVIMENTO = Verdadeiro 
+ESTADO_DESENVOLVIMENTO = true 
 
 # --- INICIALIZAÇÃO DA SESSÃO ---
 if "logado" not in st.session_state :
