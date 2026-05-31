@@ -570,7 +570,7 @@ elif aba_ativa == "🛒 Loja do Site":
                         # --- INVENTÁRIO CORRIGIDO ---
             supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
             st.rerun()
-            else:
+    else:
                 if st.button("Equipar", key=f"e_{it}", use_container_width=True):
                     nl = []
                     for x in meus_itens_perfil:
