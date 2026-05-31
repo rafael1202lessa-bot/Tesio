@@ -606,8 +606,9 @@ elif aba_ativa == "👤 Meu Perfil":
     # ==========================================================
     # --- RENDERIZAÇÃO DO BANNER PREMIUM ---
     # ==========================================================
+           # HTML definitivo com alinhamento e centralização milimétrica
     if link_moldura:
-        st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: -29px; left: -28px; pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: -26px; left: -25px; pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);"></div>', unsafe_allow_html=True)
 
