@@ -861,23 +861,20 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
                     
                     if esta_ativo:
                         if st.button("Remover", key=f"dev_rem_{id_item}", use_container_width=True):
-                            # ISSO VAI MOSTRAR OS DADOS DO ITEM CLICADO NO ECRÃ
-                            st.write("📋 ID do item clicado:", id_item)
                             try:
-                                resultado = supabase.table("loja_itens").update({"ativo": False}).eq("id", id_item).execute()
-                                st.write("✅ Resposta do Banco:", resultado)
+                                supabase.table("loja_itens").update({"ativo": False}).eq("id", id_item).execute()
                                 st.success("Item removido com sucesso!")
                                 st.rerun()
                             except Exception as erro: 
-                                st.error(f"🚨 Erro do Supabase: {erro}")
+                                st.error(f"Erro: {erro}")
                     else:
                         if st.button("Ativar", key=f"dev_atv_{id_item}", use_container_width=True):
                             try:
-                                resultado = supabase.table("loja_itens").update({"ativo": True}).eq("id", id_item).execute()
+                                supabase.table("loja_itens").update({"ativo": True}).eq("id", id_item).execute()
                                 st.success("Item reativado com sucesso!")
                                 st.rerun()
                             except Exception as erro: 
-                                st.error(f"🚨 Erro do Supabase: {erro}")
+                                st.error(f"Erro: {erro}")
             
             st.write("---")
     
