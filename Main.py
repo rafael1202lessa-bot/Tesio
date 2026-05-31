@@ -568,33 +568,29 @@ elif aba_ativa == "🛒 Loja do Site":
             st.write("---")
  # --- 6. ABA MEU PERFIL ---           
 elif aba_ativa == "👤 Perfil":
-    # Se 'user_atual' estiver vazio ou sumido, tentamos pegar direto da sessão do Streamlit
-    if 'user_atual' not in locals() and 'user_atual' not in globals():
-        if 'user_atual' in st.session_state:
-            user_atual = st.session_state['user_atual']
-        else:
-            user_atual = {}
-
-    # Caso ainda esteja vazio, tentamos buscar pelo dicionário de sessão padrão do seu app
-    if not user_atual and 'usuario' in st.session_state:
-        user_atual = st.session_state['usuario']
-
-    # Se mesmo assim não achar nada, criamos um perfil temporário para a tela não ficar em branco
-    if not user_atual:
-        user_atual = {
-            "nickname": "Rafael",
-            "username": "rafael_dev",
-            "cargo": "👑 DEV",
-            "bio": "Configurando o perfil...",
-            "foto_perfil": "https://via.placeholder.com/150"
-        }
-
-    # Agora o restante do código segue normal...
-    foto_url = user_atual.get('foto_perfil') or "https://via.placeholder.com/150"
-    nome_exibir = user_atual.get('nickname') or user_atual.get('username') or "Rafael"
-    cargo = user_atual.get('cargo') or "Membro"
-    bio = user_atual.get('bio') or "Sem bio definida."
+    st.warning("O bloco do perfil foi ativado com sucesso!")
     
+    # Valores fixos apenas para testar se o visual renderiza
+    foto_url = "https://via.placeholder.com/150"
+    nome_exibir = "Rafael DEV"
+    cargo = "👑 Administrador / DEV"
+    bio = "Testando o layout do Silver Tok"
+    
+    # Banner
+    st.markdown(
+        f"""
+        <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
+            <img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.title(f"{nome_exibir} ✨")
+    st.caption(f"Cargo: {cargo}")
+    st.write(f"*{bio}*")
+    st.success("Se você está vendo isso, o topo está funcionando perfeitamente!")
+  
     # Exibição de Seguidores (Movido para dentro do Perfil)
     seguidores_count = user_atual.get('seguidores', 0)
     seguindo_count = user_atual.get('seguindo', 0)
