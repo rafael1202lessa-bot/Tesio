@@ -359,7 +359,22 @@ if aba_ativa == "📱 Feed":
                         except Exception as err: 
                             st.error(f"Erro ao apagar: {str(err)}")
                             st.write("---")
-
+                            
+# --- ⚙️ TRATAMENTO DE SEGURANÇA PARA AS ABAS (NÃO MEXER) ---
+try:
+    # Tenta descobrir qual o nome da sua variável de navegação
+    if 'aba_selecionada' in locals() or 'aba_selecionada' in globals():
+        v_aba = aba_selecionada
+    elif 'aba_active' in locals() or 'aba_active' in globals():
+        v_aba = aba_active
+    elif 'aba_ativa' in locals() or 'aba_ativa' in globals():
+        v_aba = aba_ativa
+    else:
+        # Se o sistema não achar, ele tenta ler direto do estado do Streamlit
+        v_aba = st.session_state.get('menu_principal', '🎥 Gravar/Postar')
+except Exception as e:
+    pass
+    
 # --- 2. ABA GRAVAR/POSTAR (ESTÚDIO COM CENTRAL DA LIVE + LIVE PIX TTS) ---
 elif aba_ativa == "🎥 Gravar/Postar":
     st.title("🎥 Estúdio de Criação & Live")
