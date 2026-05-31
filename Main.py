@@ -566,22 +566,22 @@ elif aba_ativa == "🛒 Loja do Site":
                             else: 
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
-                                        # --- SISTEMA DE INVENTÁRIO DO PERFIL ---
-                            supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
-                            st.rerun()
-                    else:
-                        if st.button("Equipar", key=f"e_{it}", use_container_width=True):
-                            nl = []
-                            for x in meus_itens_perfil:
-                                if "Moldura" in x and "[EQUIPADO]" in x:
-                                    nl.append(x.replace("[EQUIPADO] ", ""))
-                                else:
-                                    nl.append(x)
-                            if it in nl: 
-                                nl.remove(it)
-                            nl.append(f"[EQUIPADO] {it}")
-                            supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
-                            st.rerun()
+                                                            # --- ATUALIZAÇÃO DO INVENTÁRIO (ALINHADO) ---
+                    supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                    st.rerun()
+            else:
+                if st.button("Equipar", key=f"e_{it}", use_container_width=True):
+                    nl = []
+                    for x in meus_itens_perfil:
+                        if "Moldura" in x and "[EQUIPADO]" in x:
+                            nl.append(x.replace("[EQUIPADO] ", ""))
+                        else:
+                            nl.append(x)
+                    if it in nl: 
+                        nl.remove(it)
+                    nl.append(f"[EQUIPADO] {it}")
+                    supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                    st.rerun()
         else:
             st.info("Inventário vazio.")
                 
