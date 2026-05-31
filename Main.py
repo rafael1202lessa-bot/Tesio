@@ -568,14 +568,14 @@ elif aba_ativa == "🛒 Loja do Site":
             st.write("---")
 # --- 6. ABA MEU PERFIL ---
 elif aba_ativa == "👤 Perfil":
-    # --- CRIAÇÃO SEGURA DE VARIÁVEIS (Evita NameError) ---
-    # Se o 'user_atual' não tiver esses dados, o app usa um texto padrão em vez de quebrar
+# O 'elif' fica encostado na esquerda (ou alinhado com o 'if' principal das abas)
+elif aba_ativa == "👤 Perfil":
+    # ⚠️ TODAS as linhas abaixo precisam ter 4 ESPAÇOS no início!
     foto_url = user_atual.get('foto_perfil') or "https://via.placeholder.com/150"
     nome_exibir = user_atual.get('nickname') or user_atual.get('username') or "Rafael"
     cargo = user_atual.get('cargo') or "Membro"
     bio = user_atual.get('bio') or "Sem bio definida."
     
-    # --- DESIGN DO BANNER E FOTO ---
     st.markdown(
         f"""
         <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
@@ -585,11 +585,10 @@ elif aba_ativa == "👤 Perfil":
         unsafe_allow_html=True
     )
     
-    # --- TEXTOS DO PERFIL ---
     st.title(f"{nome_exibir} ✨ [👑 DEV]")
     st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {cargo}")
     st.write(f"*{bio}*")
-    
+     
 # Exibição de Seguidores (se houver no banco)
 seguidores_count = user_atual.get('seguidores', 0)
 seguindo_count = user_atual.get('seguindo', 0)
