@@ -568,7 +568,7 @@ elif aba_ativa == "🛒 Loja do Site":
             st.write("---")
      # --- 6. ABA MEU PERFIL (SINCRONIZADO COM SUPABASE) ---
 elif aba_ativa == "👤 Meu Perfil":
-            # ==========================================================
+    # ==========================================================
     # --- BLOCO 3: DESIGN DO BANNER E ITENS COMPRÁVEIS ---
     # ==========================================================
     
@@ -585,6 +585,17 @@ elif aba_ativa == "👤 Meu Perfil":
     nome_moldura_ativa = ""
     caixa_nome_equipada = False
 
+    # 🛡️ TRAVA DE SEGURANÇA MÁXIMA: Garante que 'meus_itens_perfil' seja estritamente uma lista válida
+    if 'meus_itens_perfil' not in locals() or meus_itens_perfil is None:
+        meus_itens_perfil = user_atual.get('itens_exclusivos', [])
+    
+    if not isinstance(meus_itens_perfil, list):
+        meus_itens_perfil = []
+        
+    # Limpa strings inválidas ou nulas da lista
+    meus_itens_perfil = [x for x in meus_itens_perfil if x]
+
+    # Agora o loop roda 100% seguro e sem quebrar!
     for item in meus_itens_perfil:
         if "[EQUIPADO]" in item:
             nome_limpo = item.replace("[EQUIPADO] ", "")
@@ -595,7 +606,7 @@ elif aba_ativa == "👤 Meu Perfil":
             # Verifica se comprou e equipou a caixa de nome temática
             if nome_limpo == "Caixa Cavaleiresca":
                 caixa_nome_equipada = True
-
+                
     # Tratamento seguro da URL da foto de perfil
     if not foto_url or str(foto_url).strip() in ["0", "None", ""]: 
         foto_url = "https://img.icons8.com/colors/150/test-account.png"
