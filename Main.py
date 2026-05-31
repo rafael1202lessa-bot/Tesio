@@ -575,7 +575,7 @@ elif aba_ativa == "🛒 Loja do Site":
     bio = user_atual.get('bio') or "Sem bio definida."
 
 # Código CSS para renderizar o Banner e a Foto flutuando por cima
-     st.markdown(
+    st.markdown(
          f"""
          <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
              <img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);">
