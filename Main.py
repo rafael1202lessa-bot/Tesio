@@ -859,7 +859,7 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
                     # ID do item para usar como chave única no banco e no Streamlit
                     id_item = item.get("id")
                     
-                      if esta_ativo:
+                    if esta_ativo:
                         if st.button("Remover", key=f"dev_rem_{id_item}", use_container_width=True):
                             # ISSO VAI MOSTRAR OS DADOS DO ITEM CLICADO NO ECRÃ
                             st.write("📋 ID do item clicado:", id_item)
