@@ -568,7 +568,8 @@ elif aba_ativa == "🛒 Loja do Site":
             st.write("---")
      # --- 6. ABA MEU PERFIL (SINCRONIZADO COM SUPABASE) ---
 elif aba_ativa == "👤 Meu Perfil":
-    # ==========================================================
+                         
+        # ==========================================================
     # --- BLOCO 3: DESIGN DO BANNER E ITENS COMPRÁVEIS ---
     # ==========================================================
     
@@ -580,18 +581,24 @@ elif aba_ativa == "👤 Meu Perfil":
         "Moldura de Dragão Branco": ""     
     }
 
-    # 🛡️ COMPATIBILIDADE PARTE 1: Dicionário e Variável de Banners Exigidos pelo Legado
+    # 🛡️ COMPATIBILIDADE PARTE 1: Banners Exigidos pelo Legado
     estilos_banners = {
         "Padrão": "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
         "Cavaleiro": "linear-gradient(135deg, #2c3e50 0%, #0f2027 100%)",
         "Dragão": "linear-gradient(135deg, #e0e0e0 0%, #ffffff 50%, #b0c4de 100%)"
     }
-    banner_background = estilos_banners["Padrão"] # Definição segura inicial
+    banner_background = estilos_banners["Padrão"]
 
-    # 🛡️ COMPATIBILIDADE PARTE 2: Dicionário de Caixas de Nome (Resolve o erro do print 4755/4756)
+    # 🛡️ COMPATIBILIDADE PARTE 2: Caixas de Nome Exigidas pelo Legado
     estilos_caixas_nome = {
         "Normal": "background: transparent; border: none;",
         "Cavaleiresca": "background: #1a1c23; border: 3px solid;"
+    }
+
+    # 🛡️ COMPATIBILIDADE PARTE 3: Caixas de Mensagem (Resolve o erro do print 4757.png)
+    estilos_caixas_mensagem = {
+        "Normal": "background: transparent; border: none; padding: 0;",
+        "Personalizada": "background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 10px;"
     }
 
     # Link da imagem de perfil
