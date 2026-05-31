@@ -566,67 +566,64 @@ elif aba_ativa == "🛒 Loja do Site":
                             else: 
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
-            
-                                            # === CÓDIGO COMPLETO DO INVENTÁRIO (ALINHADO) ===
-                    for it in meus_itens_perfil:
-                        if "[EQUIPADO]" in it:
-                            if st.button("Desequipar", key=f"d_{it}", use_container_width=True):
-                                nl = [x for x in meus_itens_perfil if x != it]
-                                supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
-                                st.rerun()
-                        else:
-                            if st.button("Equipar", key=f"e_{it}", use_container_width=True):
-                                nl = []
-                                for x in meus_itens_perfil:
-                                    if "Moldura" in x and "[EQUIPADO]" in x:
-                                        nl.append(x.replace("[EQUIPADO] ", ""))
-                                    else:
-                                        nl.append(x)
-                                
-                                # O 'if' correto rodando ANTES do envio ao banco
-                                if it in nl: 
-                                    nl.remove(it)
-                                
-                                nl.append(f"[EQUIPADO] {it}")
-                                supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
-                                st.rerun()
+# --- 6. ABA MEU PERFIL ---
+elif aba_ativa == "👤 Meu Perfil":
+    # 1. Deixe as linhas originais do seu perfil rodarem primeiro (linhas 529 a 544 do seu print)
+    meus_itens_perfil = user_atual.get('itens_exclusivos', [])
+    if not isinstance(meus_itens_perfil, list): 
+        meus_itens_perfil = []
+
+    # ... (mantenha aqui os seus códigos de design de banner, col_foto e col_stats originais) ...
+    
+    st.write("---")
+    
+    # 2. ADICIONE ESSA LINHA AQUI para criar os botões das sub-abas na tela:
+    sub_aba_inventario, sub_aba_editar, sub_aba_convites, sub_aba_amigos = st.tabs(["🎒 Meu Inventário", "⚙️ Editar Perfil", "✉️ Convites", "👥 Amigos"])
+    
+    # 3. Agora você abre cada sub-aba usando o 'with' delas:
+    with sub_aba_inventario:
+        # Coloque aqui dentro o código que lista as suas molduras e itens
+        if meus_itens_perfil:
+            itens_exib = list(set([i.replace("[EQUIPADO] ", "") for i in meus_itens_perfil if i]))
+            for it in itens_exib:
+                col_n, col_a = st.columns([3, 1])
+                eq = f"[EQUIPADO] {it}" in meus_itens_perfil
+                with col_n: st.markdown(f"🟢 **{it}**" if eq else f"⚪ {it}")
+                with col_a:
+                    if eq:
+                        if st.button("Desequipar", key=f"d_{it}", use_container_width=True):
+                            # Tira o equipado, mas coloca o item normal de volta na lista
+                            nl = [x for x in meus_itens_perfil if x != f"[EQUIPADO] {it}"]
+                            if it not in nl: nl.append(it)
+                            supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                            st.rerun()
+                    else:
+                        if st.button("Equipar", key=f"e_{it}", use_container_width=True):
+                            # Desequipa a moldura anterior sem deletar ela da conta
+                            nl = []
+                            for x in meus_itens_perfil:
+                                if "Moldura" in x and "[EQUIPADO]" in x:
+                                    nl.append(x.replace("[EQUIPADO] ", ""))
+                                else:
+                                    nl.append(x)
+                            if it in nl: nl.remove(it)
+                            nl.append(f"[EQUIPADO] {it}")
+                            supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                            st.rerun()
         else:
-            # Este 'else' fecha o bloco principal (Inventário vazio)
             st.info("Inventário vazio.")
-                  
+
     with sub_aba_editar:
-        n_nick = st.text_input("Nickname:", value=user_atual.get('nickname'))
-        n_foto = st.text_input("URL Foto:", value=user_atual.get('foto_perfil'))
-        n_bio = st.text_area("Bio:", value=user_atual.get('bio'), max_chars=150)
-        if st.button("💾 Salvar Perfil", use_container_width=True):
-            supabase.table("perfis_usuarios").update({"nickname": n_nick, "foto_perfil": n_foto, "bio": n_bio}).eq("username", user_atual.get('username')).execute()
-            st.success("Salvo!")
-            st.rerun()
+        st.write("Configurações de edição do perfil aqui...")
+        # (coloque o resto do seu código original de editar aqui dentro)
 
     with sub_aba_convites:
-        st.subheader("✉️ Sistema de Convites Compartilhados")
-        if user_atual.get('username') == "rafael_oficial":
-            st.info("👑 **Vantagem de Desenvolvedor:** Seus convites são **INFINITOS** e ilimitados!")
-        else:
-            st.metric("Seus Créditos de Convite Restantes:", f"🎫 {user_atual.get('convites_restantes', 0)} de 3")
-        
-        link_gerado = f"https://silvertokv2.streamlit.app/?ref={user_atual.get('username')}"
-        st.markdown("### 🔗 Seu Link de Convite Exclusivo:")
-        st.code(link_gerado, language="text")
-        st.caption("Envie esse link para seus amigos. Ao entrarem por ele, o sistema pula o código secreto automaticamente!")
+        st.write("Área de convites aqui...")
+        # (coloque o resto do seu código original de convites aqui dentro)
 
-    with sub_aba_seguidores:
-        amg_add = st.text_input("Seguir usuário (@):").strip()
-        if st.button("➕ Seguir") and amg_add:
-            chk = supabase.table("perfis_usuarios").select("username").eq("username", amg_add).execute()
-            if chk.data:
-                la = user_atual.get('lista_amigos', [])
-                if not isinstance(la, list): la = []
-                if amg_add not in la:
-                    la.append(amg_add)
-                    supabase.table("perfis_usuarios").update({"lista_amigos": la, "seguindo": user_atual.get('seguindo', 0) + 1}).eq("username", user_atual.get('username')).execute()
-                    st.success("Seguindo!")
-                    st.rerun()
+    with sub_aba_amigos:
+        st.write("Lista de amigos aqui...")
+        # (coloque o resto do seu código original de amigos aqui dentro)
 
 # --- 7. ABA VISITAR PERFIL ALHEIO ---
 elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
