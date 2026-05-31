@@ -567,7 +567,6 @@ elif aba_ativa == "🛒 Loja do Site":
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
 # --- 6. ABA MEU PERFIL ---
-elif aba_ativa == "👤 Perfil":
 # O 'elif' fica encostado na esquerda (ou alinhado com o 'if' principal das abas)
 elif aba_ativa == "👤 Perfil":
     # ⚠️ TODAS as linhas abaixo precisam ter 4 ESPAÇOS no início!
