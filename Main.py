@@ -569,87 +569,57 @@ elif aba_ativa == "🛒 Loja do Site":
 
 # --- 6. ABA MEU PERFIL ---
 elif aba_ativa == "👤 Meu Perfil":
-    meus_itens_perfil = user_atual.get('itens_exclusivos', [])
-    if not isinstance(meus_itens_perfil, list): meus_itens_perfil = []
-        
-    selo_meu_perfil, moldura_meu_perfil = aplicar_moldura_e_selo(user_atual.get('username'), user_atual.get('titulo'), meus_itens_perfil, user_atual.get('seguidores', 0))
-    
-    col_foto, col_stats = st.columns([1, 2])
-    with col_foto:
-        f_perfil = user_atual.get('foto_perfil')
-        if not f_perfil or str(f_perfil).strip() in ["0", "None", ""] or not str(f_perfil).startswith("http"):
-            f_perfil = "https://img.icons8.com/colors/150/test-account.png"
-        st.markdown(f'<img src="{f_perfil}" style="{moldura_meu_perfil}" width="140">', unsafe_allow_html=True)
-            
-    with col_stats:
-        st.header(f"{user_atual.get('nickname', 'Usuário')}{selo_meu_perfil}")
-        st.write(f"**@{user_atual.get('username', '')}** | {user_atual.get('titulo', 'Usuário')}")
-        
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Seguidores", user_atual.get('seguidores', 0))
-        c2.metric("Seguindo", user_atual.get('seguindo', 0))
-        c3.metric("Coins", f"{user_atual.get('dinheiro', 0)}")
-    
-    st.write(f"📝 **Bio:** {user_atual.get('bio', 'Disponível')}")
-    st.write("---")
-    
-    exp_seg = st.expander("👥 Ver Meus Seguidores / Amigos")
-    with exp_seg:
-        st.markdown("### ➕ Adicionar Novo Amigo/Seguidor")
-        amigo_para_add = st.text_input("Digite o @username exato do seguidor:", key="input_add_amigo_perfil").strip()
-        if st.button("➕ Adicionar na Lista", use_container_width=True):
-            if amigo_para_add:
-                try:
-                    checar_user = supabase.table("perfis_usuarios").select("username").eq("username", amigo_para_add).execute()
-                    if checar_user.data:
-                        lista_amigos_perfil = user_atual.get('lista_amigos', [])
-                        if not isinstance(lista_amigos_perfil, list): lista_amigos_perfil = []
-                        
-                        if amigo_para_add in lista_amigos_perfil: st.warning("Este usuário já está na sua lista!")
-                        else:
-                            lista_amigos_perfil.append(amigo_para_add)
-                            supabase.table("perfis_usuarios").update({"lista_amigos": lista_amigos_perfil}).eq("username", user_atual.get('username')).execute()
-                            st.success(f"🎉 @{amigo_para_add} adicionado com sucesso!")
+                            supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
                             st.rerun()
-                    else: st.error("Usuário não encontrado no Silver Tok.")
-                except: st.error("Erro ao processar adição de amigo.")
-            else: st.warning("Por favor, digite um nome de usuário.")
+                    else:
+                        if st.button("Equipar", key=f"e_{it}", use_container_width=True):
+                            nl = []
+                            for x in meus_itens_perfil:
+                                if "Moldura" in x and "[EQUIPADO]" in x:
+                                    nl.append(x.replace("[EQUIPADO] ", ""))
+                                else:
+                                    nl.append(x)
+                            if it in nl: 
+                                nl.remove(it)
+                            nl.append(f"[EQUIPADO] {it}")
+                            supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                            st.rerun()
+        else:
+            st.info("Inventário vazio.")
+                
+    with sub_aba_editar:
+        n_nick = st.text_input("Nickname:", value=user_atual.get('nickname'))
+        n_foto = st.text_input("URL Foto:", value=user_atual.get('foto_perfil'))
+        n_bio = st.text_area("Bio:", value=user_atual.get('bio'), max_chars=150)
+        if st.button("💾 Salvar Perfil", use_container_width=True):
+            supabase.table("perfis_usuarios").update({"nickname": n_nick, "foto_perfil": n_foto, "bio": n_bio}).eq("username", user_atual.get('username')).execute()
+            st.success("Salvo!")
+            st.rerun()
 
-        st.write("---")
-        lista_amigos_perfil = user_atual.get('lista_amigos', [])
-        if lista_amigos_perfil and isinstance(lista_amigos_perfil, list):
-            for amg in lista_amigos_perfil:
-                col_amg_nome, col_amg_btn = st.columns([3, 2])
-                with col_amg_nome: st.write(f"👤 **@{amg}**")
-                with col_amg_btn:
-                    if st.button(f"💬 Conversa com Seguidor", key=f"chat_seg_{amg}", use_container_width=True):
-                        st.session_state.sala_privada_atual = obter_id_sala_privada(user_atual.get('username'), amg)
-                        st.session_state.codigo_grupo_atual = None
-                        st.rerun()
-        else: st.caption("Nenhum seguidor ou amigo adicionado ainda.")
-    
-    st.write("---")
-    st.subheader("🎒 Meu Inventário Visual")
-    if meus_itens_perfil:
-        itens_para_exibir = list(set([item.replace("[EQUIPADO] ", "") for item in meus_itens_perfil if item]))
-        for item_base in itens_para_exibir:
-            col_item_nome, col_item_acao = st.columns([3, 1])
-            esta_equipado = f"[EQUIPADO] {item_base}" in meus_itens_perfil
-            with col_item_nome:
-                if esta_equipado: st.markdown(f"🟢 **{item_base}** *(Equipado)*")
-                else: st.markdown(f"⚪ {item_base}")
-            with col_item_acao:
-                if esta_equipado:
-                    if st.button("🔴 Desequipar", key=f"deseq_{item_base}", use_container_width=True):
-                        nova_lista = [x for x in meus_itens_perfil if x != f"[EQUIPADO] {item_base}"] + [item_base]
-                        supabase.table("perfis_usuarios").update({"itens_exclusivos": nova_lista}).eq("username", user_atual.get('username')).execute()
-                        st.rerun()
-                else:
-                    if st.button("🟢 Equipar", key=f"eq_{item_base}", use_container_width=True):
-                        nova_lista = [x for x in meus_itens_perfil if "Moldura" not in x or "Moldura" not in item_base] + [f"[EQUIPADO] {item_base}"]
-                        supabase.table("perfis_usuarios").update({"itens_exclusivos": nova_lista}).eq("username", user_atual.get('username')).execute()
-                        st.rerun()
-    else: st.info("Você não possui itens.")
+    with sub_aba_convites:
+        st.subheader("✉️ Sistema de Convites Compartilhados")
+        if user_atual.get('username') == "rafael_oficial":
+            st.info("👑 **Vantagem de Desenvolvedor:** Seus convites são **INFINITOS** e ilimitados!")
+        else:
+            st.metric("Seus Créditos de Convite Restantes:", f"🎫 {user_atual.get('convites_restantes', 0)} de 3")
+        
+        link_gerado = f"https://silvertokv2.streamlit.app/?ref={user_atual.get('username')}"
+        st.markdown("### 🔗 Seu Link de Convite Exclusivo:")
+        st.code(link_gerado, language="text")
+        st.caption("Envie esse link para seus amigos. Ao entrarem por ele, o sistema pula o código secreto automaticamente!")
+
+    with sub_aba_seguidores:
+        amg_add = st.text_input("Seguir usuário (@):").strip()
+        if st.button("➕ Seguir") and amg_add:
+            chk = supabase.table("perfis_usuarios").select("username").eq("username", amg_add).execute()
+            if chk.data:
+                la = user_atual.get('lista_amigos', [])
+                if not isinstance(la, list): la = []
+                if amg_add not in la:
+                    la.append(amg_add)
+                    supabase.table("perfis_usuarios").update({"lista_amigos": la, "seguindo": user_atual.get('seguindo', 0) + 1}).eq("username", user_atual.get('username')).execute()
+                    st.success("Seguindo!")
+                    st.rerun()
 
 # --- 7. ABA VISITAR PERFIL ALHEIO ---
 elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
