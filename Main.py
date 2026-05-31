@@ -825,7 +825,7 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
                 st.error(f"Erro ao salvar no banco: {str(e)}")
         else:
             st.warning("Por favor, preencha o nome do produto e defina um preço válido.")
-    # GERENCIADOR DE REMOVER/ATIVAR PRODUTOS VIA BANCO DE DADOS
+        # GERENCIADOR DE REMOVER/ATIVAR PRODUTOS VIA BANCO DE DADOS
     st.write("---")
     st.subheader("📦 Gerenciar Itens da Loja")
 
@@ -839,29 +839,43 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
         st.info("Nenhum produto cadastrado no banco de dados.")
     else:
         for item in todos_itens:
-            status_texto = "🟢 Ativo na Loja" if item.get("ativo") else "🔴 Ocultado/Removido"
+            # Pega o status ativo (se for None, assume True por segurança)
+            esta_ativo = item.get("ativo", True)
+            status_texto = "🟢 Ativo na Loja" if esta_ativo else "🔴 Ocultado/Removido"
+            
+            # Garante que vai ler 'nome_produto' ou apenas 'nome' dependendo do banco
+            nome_item = item.get("nome_produto") or item.get("nome") or "Item Sem Nome"
+            moeda_item = item.get("moeda", "SC") # Puxa se é R$ ou SC
             
             with st.container():
                 col_nome, col_status, col_btn = st.columns([2, 1, 1])
                 with col_nome:
-                    st.markdown(f"**{item.get('nome_produto')}**\n\n💰 {item.get('preco')} Coins")
+                    st.markdown(f"**{nome_item}**\n\n💰 {item.get('preco')} {moeda_item}")
                 with col_status:
                     st.write(f"Status:\n{status_texto}")
                 with col_btn:
                     st.write("<br>", unsafe_allow_html=True)
                     
-                    if item.get("ativo"):
-                        if st.button("Remover", key=f"dev_rem_{item.get('id')}", use_container_width=True):
+                    # ID do item para usar como chave única no banco e no Streamlit
+                    id_item = item.get("id")
+                    
+                    if esta_ativo:
+                        if st.button("Remover", key=f"dev_rem_{id_item}", use_container_width=True):
                             try:
-                                supabase.table("loja_itens").update({"ativo": False}).eq("nome_produto", item.get("nome_produto")).execute()
-                                st.success("Item removido!")
+                                # CORREÇÃO: Filtrando direto pelo ID para garantir que remova na hora!
+                                supabase.table("loja_itens").update({"ativo": False}).eq("id", id_item).execute()
+                                st.success("Item removido com sucesso!")
                                 st.rerun()
-                            except Exception as erro: st.error(f"Erro: {erro}")
+                            except Exception as erro: 
+                                st.error(f"Erro: {erro}")
                     else:
-                        if st.button("Ativar", key=f"dev_atv_{item.get('id')}", use_container_width=True):
+                        if st.button("Ativar", key=f"dev_atv_{id_item}", use_container_width=True):
                             try:
-                                supabase.table("loja_itens").update({"ativo": True}).eq("nome_produto", item.get("nome_produto")).execute()
-                                st.success("Item reativado!")
+                                # CORREÇÃO: Filtrando direto pelo ID para garantir que ative na hora!
+                                supabase.table("loja_itens").update({"ativo": True}).eq("id", id_item).execute()
+                                st.success("Item reativado com sucesso!")
                                 st.rerun()
-                            except Exception as erro: st.error(f"Erro: {erro}")
+                            except Exception as erro: 
+                                st.error(f"Erro: {erro}")
             st.write("---")
+    
