@@ -567,9 +567,10 @@ elif aba_ativa == "🛒 Loja do Site":
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
             
+
 # --- 6. ABA MEU PERFIL ---
-# --- TOPO DO PERFIL: BANNER E FOTO DE PERFIL ---
-# Garante que os dados existam ou use padrões caso estejam vazios
+
+elif aba_ativa == "👤 Perfil":
     foto_url = user_atual.get('foto_perfil') or "https://via.placeholder.com/150"
     nickname = user_atual.get('nickname') or user_atual.get('username')
     cargo = user_atual.get('cargo') or "Membro"
