@@ -21,11 +21,11 @@ ESTADO_DESENVOLVIMENTO = True
 
 # --- INICIALIZAÇÃO DA SESSÃO ---
 if "logado" not in st.session_state :
-    rua. estado_sessão . logado = Falso
+    st. session_state . logado = False
 if "user_data" not in st. session_state :
     st. session_state . user_data = None
 if "perfil_visitado"not in st. session_state :
-    rua. estado_sessão . perfil_visitado = Nenhum
+    rua. sedfion_state . perfil_visitado = None
 if "historico_ia" not in st. session_state :
     st. session_state . historico_ia = [ ]
 
