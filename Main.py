@@ -615,18 +615,21 @@ elif aba_ativa and "Perfil" in aba_ativa:
             link_moldura = catalogo_molduras.get(nome_da_moldura)
 
     # Renderiza o layout correto na tela
-    if link_moldura:
+        if link_moldura:
         st.markdown(
             f"""
             <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
                 <div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;">
+                    
                     <img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;">
-                    <img src="{link_moldura}" style="position: absolute; width: 155px; height: 155px; object-fit: contain; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 2;">
+                    
+                    <img src="{link_moldura}" style="width: 175px; height: 175px; object-fit: contain; position: absolute; top: -37px; left: -37px; pointer-events: none; z-index: 2;">
+                    
                 </div>
             </div>
             """,
             unsafe_allow_html=True
-        )
+    )
     else:
         st.markdown(
             f"""
