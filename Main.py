@@ -346,7 +346,7 @@ if aba_ativa == "📱 Feed":
                             st.write("---")
 
 # --- 2. ABA GRAVAR/POSTAR (ESTÚDIO COM CENTRAL DA LIVE + LIVE PIX TTS) ---
-elif aba_active == "🎥 Gravar/Postar":
+elif aba_ativa == "🎥 Gravar/Postar":
     st.title("🎥 Estúdio de Criação & Live")
     
     # Criando as abas organizadas com as funcionalidades completas
