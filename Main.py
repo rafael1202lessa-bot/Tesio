@@ -598,8 +598,8 @@ elif aba_ativa and "Perfil" in aba_ativa:
     meus_itens_perfil = user_atual.get('itens_exclusivos', []) or []
 
     
-    # ==========================================
-    # --- 3. DESIGN DO BANNER PREMIUM (SUPER EXPANSÃO) ---
+     # ==========================================
+    # --- 3. DESIGN DO BANNER PREMIUM (AJUSTE CIRÚRGICO) ---
     # ==========================================
     
     # 🎫 CÁTALOGO DE MOLDURAS DO SILVER TOK
@@ -615,32 +615,11 @@ elif aba_ativa and "Perfil" in aba_ativa:
             nome_da_moldura = item.replace("[EQUIPADO] ", "")
             link_moldura = catalogo_molduras.get(nome_da_moldura)
 
-    # HTML com super dimensionamento para imagens com muita transparência
+    # Renderiza o HTML usando aspas simples externas para aceitar as aspas duplas do seu código interno
     if link_moldura:
-        st.markdown(
-            f"""
-            <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
-                <div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;">
-                    
-                    <img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;">
-                    
-                    <img src="{link_moldura}" style="width: 240px; height: 240px; object-fit: contain; position: absolute; top: -70px; left: -70px; pointer-events: none; z-index: 2;">
-                    
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 190px; height: 190px; object-fit: contain; position: absolute; top: -51px; left: -45px; pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
     else:
-        # Layout padrão caso não tenha moldura ativada
-        st.markdown(
-            f"""
-            <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
-                <img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);">
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);"></div>', unsafe_allow_html=True)
                   
     # 4. INFORMAÇÕES DO PERFIL
     st.title(f"{nome_exibir} ✨ [👑 DEV]")
