@@ -330,7 +330,7 @@ elif aba_ativa == "🎥 Gravar/Postar":
             st.write("---")
             col_video_retorno, col_chat_live = st.columns([4, 3])
             
-                with col_video_retorno:
+              with col_video_retorno:
                 st.markdown("### 🖥️ Retorno do seu Vídeo")
                 # Exibe a câmera do desenvolvedor na tela para ver o próprio enquadramento
                 st.camera_input("Monitor da Câmera", key="monitor_live_cam")
