@@ -572,6 +572,7 @@ elif aba_ativa == "👤 Meu Perfil":
     catalogo_molduras = {
         "Moldura angelical": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura-anjo.png",
         "Moldura Cyberpunk": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_cyber.png"
+        "Moldura dragão azul": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_dragon.png",
     }
 
     # 1. BUSCA FRESCA NO BANCO: Força o app a ler o inventário direto do Supabase para pegar compras novas
