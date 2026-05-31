@@ -30,9 +30,9 @@ if "historico_ia" not in st. session_state :
     st. session_state . historico_ia = [ ]
 
 # --- BANCO DE DADOS LOCAL DO CHAT E LIVES (Sessão Ativa) ---
-se  "chat_privado_salas"  não estiver  em st. session_state :
+if "chat_privado_salas" not in st. session_state :
     st. session_state . chat_privado_salas = {  } 
-se  "chat_grupos"  não estiver  em st. session_state :
+if "chat_grupos" not in st. session_state :
     st. session_state . chat_grupos = {  } 
 if "sala_privada_atual" not in st.session_state:
     st.session_state.sala_privada_atual = None
