@@ -595,7 +595,10 @@ elif aba_ativa and "Perfil" in aba_ativa:
     bio = user_atual.get('bio') or "Sem bio definida."
     seguidores_count = user_atual.get('seguidores', 0)
     seguindo_count = user_atual.get('seguindo', 0)    # ==========================================
-    # --- 3. DESIGN DO BANNER PREMIUM (SISTEMA DE ESCALA) ---
+    
+
+    # ==========================================
+    # --- 3. DESIGN DO BANNER PREMIUM (ANTI-ERRO) ---
     # ==========================================
     
     # 🎫 CÁTALOGO DE MOLDURAS DO SILVER TOK
@@ -604,9 +607,12 @@ elif aba_ativa and "Perfil" in aba_ativa:
         "Moldura Cyberpunk": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_cyber.png"
     }
 
+    # Proteção para garantir que o app não dê NameError se a lista sumiu
+    itens_usuario = meus_itens_perfil if 'meus_itens_perfil' in locals() else []
+
     # Verifica se o usuário tem alguma moldura equipada
     link_moldura = None
-    for item in meus_itens_perfil:
+    for item in itens_usuario:
         if "[EQUIPADO]" in item and "Moldura" in item:
             nome_da_moldura = item.replace("[EQUIPADO] ", "")
             link_moldura = catalogo_molduras.get(nome_da_moldura)
