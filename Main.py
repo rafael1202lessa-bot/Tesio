@@ -30,10 +30,10 @@ if "historico_ia" not in st. session_state :
     st. session_state . historico_ia = [ ]
 
 # --- BANCO DE DADOS LOCAL DO CHAT E LIVES (Sessão Ativa) ---
-if "chat_privado_salas" not in st. session_state :
-    st. session_state . chat_privado_salas = { } 
-if "chat_grupos" not in st. session_state :
-    st. session_state . chat_grupos = { } 
+se  "chat_privado_salas"  não estiver  em st. session_state :
+    st. session_state . chat_privado_salas = {  } 
+se  "chat_grupos"  não estiver  em st. session_state :
+    st. session_state . chat_grupos = {  } 
 if "sala_privada_atual" not in st.session_state:
     st.session_state.sala_privada_atual = None
 if "codigo_grupo_atual" not in st.session_state:
@@ -568,12 +568,13 @@ elif aba_ativa == "🛒 Loja do Site":
             st.write("---")
      # --- 6. ABA MEU PERFIL (SINCRONIZADO COM SUPABASE) ---
 elif aba_ativa == "👤 Meu Perfil":
-    # 🎫 CÁTALOGO DE MOLDURAS EXCLUSIVAS
-    catalogo_molduras = 
+        # 🎫 CÁTALOGO DE MOLDURAS EXCLUSIVAS (CORRIGIDO)
+    catalogo_molduras = {
         "Moldura angelical": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura-anjo.png",
         "Moldura Cyberpunk": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_cyber.png",
-        "Moldura dragon blue": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_dragon.png"
-
+        "moldura blue dragon": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_dragon.png"
+    }
+    
     # 1. BUSCA FRESCA NO BANCO: Força o app a ler o inventário direto do Supabase para pegar compras novas
     try:
         dados_frescos = supabase.table("perfis_usuarios").select("itens_exclusivos, foto_perfil").eq("username", user_atual.get('username')).execute()
