@@ -53,6 +53,21 @@ TITULOS = {
     "amiga_divulgadora": "📢 Divulgadora",
 }
 
+# --- 1. FUNÇÃO QUE FAZ O NAVEGADOR FALAR ---
+def emitir_alerta_voz(texto_mensagem):
+    """Injeta um script JavaScript discreto para ler a mensagem em voz alta."""
+    js_code = f"""
+    <script>
+    if ('speechSynthesis' in window) {{
+        window.speechSynthesis.cancel(); 
+        var msg = new SpeechSynthesisUtterance({repr(texto_mensagem)});
+        msg.lang = 'pt-BR';
+        msg.rate = 1.1; 
+        window.speechSynthesis.speak(msg);
+    }}
+    </script>
+    """
+    st.components.v1.html(js_code, height=0, width=0)
 # --- FUNÇÃO PARA SISTEMA DE TEXT-TO-SPEECH (LIVE PIX VOZ ALTA) ---
 def emitir_alerta_voz(texto_mensagem):
     """Injeta um script JavaScript discreto para ler a mensagem em voz alta no navegador."""
