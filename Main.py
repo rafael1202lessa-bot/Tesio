@@ -597,16 +597,47 @@ elif aba_ativa and "Perfil" in aba_ativa:
     seguindo_count = user_atual.get('seguindo', 0)
     meus_itens_perfil = user_atual.get('itens_exclusivos', []) or []
 
-    # 3. DESIGN DO BANNER PREMIUM
-    st.markdown(
-        f"""
-        <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
-            <img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);">
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # 3. DESIGN DO BANNER PREMIUM (SISTEMA DINÂMICO DE MOLDURAS)
+    
+    # 🎫 CÁTALOGO DE MOLDURAS DO SILVER TOK
+    # Quando criar uma moldura nova, basta adicionar ela aqui embaixo!
+    catalogo_molduras = {
+        "Moldura angelical": "https://raw.githubusercontent.com/rafael1202lessa-b/NOME_DO_REPOSITORIO/main/moldura_anjo.png",
+        "Moldura de Fogo 🔥": "https://raw.githubusercontent.com/rafael1202lessa-b/NOME_DO_REPOSITORIO/main/moldura_fogo.png",
+        "Moldura Cyberpunk": "https://raw.githubusercontent.com/rafael1202lessa-b/NOME_DO_REPOSITORIO/main/moldura_cyber.png"
+    }
 
+    # Verifica o que está equipado
+    link_moldura = None
+    for item in meus_itens_perfil:
+        if "[EQUIPADO]" in item and "Moldura" in item:
+            nome_da_moldura = item.replace("[EQUIPADO] ", "")
+            # O código busca automaticamente o link correto no seu catálogo!
+            link_moldura = catalogo_molduras.get(nome_da_moldura)
+
+    # HTML ÚNICO: Ele se adapta sozinho se tiver ou não moldura
+    if link_moldura:
+        st.markdown(
+            f"""
+            <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
+                <div style="position: absolute; bottom: -50px; left: 15px; width: 120px; height: 120px;">
+                    <img src="{foto_url}" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; position: absolute; top: 15px; left: 15px; border: 3px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.1);">
+                    <img src="{link_moldura}" style="position: absolute; top: 0; left: 0; width: 120px; height: 120px; pointer-events: none;">
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            f"""
+            <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
+                <img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
     # 4. INFORMAÇÕES DO PERFIL
     st.title(f"{nome_exibir} ✨ [👑 DEV]")
     st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {cargo}")
