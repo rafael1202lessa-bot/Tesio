@@ -602,10 +602,10 @@ elif aba_ativa and "Perfil" in aba_ativa:
     # ==========================================
     
     # 🎫 CÁTALOGO DE MOLDURAS DO SILVER TOK
-    # Como as imagens estão na mesma pasta do main.py, usamos apenas o nome do arquivo!
+    # IMPORTANTE: Os nomes têm de estar idênticos aos ficheiros do teu GitHub!
     catalogo_molduras = {
-        "Moldura angelical": "moldura-anjo.png",
-        "Moldura Cyberpunk": "moldura_cyber.png"
+        "Moldura angelical": "moldura-anjo.png",   # Com hífen, igualzinho ao print
+        "Moldura Cyberpunk": "moldura_cyber.png"   # Com underline, igualzinho ao print
     }
 
     # Verifica se o usuário tem alguma moldura equipada
@@ -638,7 +638,7 @@ elif aba_ativa and "Perfil" in aba_ativa:
             """,
             unsafe_allow_html=True
         )
-          
+                  
     # 4. INFORMAÇÕES DO PERFIL
     st.title(f"{nome_exibir} ✨ [👑 DEV]")
     st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {cargo}")
