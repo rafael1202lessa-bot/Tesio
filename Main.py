@@ -584,9 +584,12 @@ elif aba_ativa == "🛒 Loja do Site":
          unsafe_allow_html=True
 )
 
-# --- INFORMAÇÕES DO USUÁRIO ---
-st.title(f"{nickname} ✨ [👑 DEV]")
-st.caption(f"@{user_atual.get('username')} | Cargo: {cargo}")
+# Garanta que o nickname tenha um texto padrão caso falte no banco
+nome_exibir = user_atual.get('nickname') or user_atual.get('username') or "Rafael"
+
+# Agora exibe sem risco de dar NameError
+st.title(f"{nome_exibir} ✨ [👑 DEV]")
+st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {user_atual.get('cargo', 'Membro')}")
 st.write(f"*{bio}*")
 
 # Exibição de Seguidores (se houver no banco)
