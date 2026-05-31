@@ -567,11 +567,10 @@ elif aba_ativa == "🛒 Loja do Site":
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
 
-# --- 6. ABA MEU PERFIL ---
-elif aba_ativa == "👤 Meu Perfil":
+                                         # --- 6. ABA MEU PERFIL ---
                             supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
                             st.rerun()
-                    else:
+                            else:
                         if st.button("Equipar", key=f"e_{it}", use_container_width=True):
                             nl = []
                             for x in meus_itens_perfil:
@@ -620,7 +619,6 @@ elif aba_ativa == "👤 Meu Perfil":
                     supabase.table("perfis_usuarios").update({"lista_amigos": la, "seguindo": user_atual.get('seguindo', 0) + 1}).eq("username", user_atual.get('username')).execute()
                     st.success("Seguindo!")
                     st.rerun()
-
 # --- 7. ABA VISITAR PERFIL ALHEIO ---
 elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visitado:
     alvo = st.session_state.perfil_visitado
