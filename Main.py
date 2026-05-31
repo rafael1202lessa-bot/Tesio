@@ -567,16 +567,13 @@ elif aba_ativa == "🛒 Loja do Site":
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
             
-
 # --- 6. ABA MEU PERFIL ---
-
 elif aba_ativa == "👤 Perfil":
     foto_url = user_atual.get('foto_perfil') or "https://via.placeholder.com/150"
-    nickname = user_atual.get('nickname') or user_atual.get('username')
+    nome_exibir = user_atual.get('nickname') or user_atual.get('username') or "Rafael"
     cargo = user_atual.get('cargo') or "Membro"
     bio = user_atual.get('bio') or "Sem bio definida."
-
-# Código CSS para renderizar o Banner e a Foto flutuando por cima
+    
     st.markdown(
         f"""
         <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
@@ -584,7 +581,7 @@ elif aba_ativa == "👤 Perfil":
         </div>
         """,
         unsafe_allow_html=True
-)
+    )
 
 # --- INFORMAÇÕES DO USUÁRIO ---
 st.title(f"{nome_exibir} ✨ [👑 DEV]")
