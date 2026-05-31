@@ -566,6 +566,7 @@ elif aba_ativa == "🛒 Loja do Site":
                             else: 
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
+            
 # --- 6. ABA MEU PERFIL ---
 # O 'elif' fica encostado na esquerda (ou alinhado com o 'if' principal das abas)
 elif aba_ativa == "👤 Perfil":
