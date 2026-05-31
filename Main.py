@@ -569,7 +569,7 @@ elif aba_ativa == "🛒 Loja do Site":
      # --- 6. ABA MEU PERFIL (SINCRONIZADO COM SUPABASE) ---
 elif aba_ativa == "👤 Meu Perfil":
     # 🎫 CÁTALOGO DE MOLDURAS EXCLUSIVAS
-    catalogo_molduras = {
+    catalogo_molduras = 
         "Moldura angelical": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura-anjo.png",
         "Moldura Cyberpunk": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_cyber.png",
         "Moldura dragon blue": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_dragon.png"
