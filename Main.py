@@ -806,7 +806,7 @@ elif aba_ativa == "⚡ Painel Dev" and user_atual.get('username') == "rafael_ofi
     st.subheader("🆕 Cadastrar Novo Item na Loja")
     
     nome_produto = st.text_input("Nome do Produto:", placeholder="Ex: Conta VIP Silver Tok", key="prod_nome_dev")
-    preco_produto = st.number_input("Preço do Item (R$):", min_value=0.0, value=5.0, step=1.0, key="prod_preco_dev")
+    preco_produto = st.number_input("Preço do Item (sc):", min_value=0.0, value=5.0, step=1.0, key="prod_preco_dev")
     imagem_produto = st.text_input("Link da Imagem/Ícone:", placeholder="https://...", key="prod_img_dev")
     desc_produto = st.text_area("Descrição/Benefícios do Produto:", placeholder="O que o usuário ganha...", key="prod_desc_dev")
     
