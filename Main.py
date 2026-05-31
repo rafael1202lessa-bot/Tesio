@@ -582,25 +582,27 @@ elif aba_ativa == "👤 Perfil":
         unsafe_allow_html=True
     )
 
-# --- INFORMAÇÕES DO USUÁRIO ---
+    # --- INFORMAÇÕES DO USUÁRIO ---
     st.title(f"{nome_exibir} ✨ [👑 DEV]")
     st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {cargo}")
     st.write(f"*{bio}*")
     
-# Exibição de Seguidores (se houver no banco)
-seguidores_count = user_atual.get('seguidores', 0)
-seguindo_count = user_atual.get('seguindo', 0)
-st.markdown(f"**👥 {seguidores_count}** Seguidores │ **👤 {seguindo_count}** Seguindo")
+    # Exibição de Seguidores (Movido para dentro do Perfil)
+    seguidores_count = user_atual.get('seguidores', 0)
+    seguindo_count = user_atual.get('seguindo', 0)
+    st.markdown(f"**👥 {seguidores_count}** Seguidores │ **👤 {seguindo_count}** Seguindo")
 
-st.write("---")
+    st.write("---")
 
-# --- AQUI COMEÇAM AS SUAS SUB-ABAS (sub_aba_inventario, sub_aba_editar, etc.) ---
-   
-    # 2. ADICIONE ESSA LINHA AQUI para criar os botões das sub-abas na tela:
-sub_aba_inventario, sub_aba_editar, sub_aba_convites, sub_aba_amigos = st.tabs(["🎒 Meu Inventário", "⚙️ Editar Perfil", "✉️ Convites", "👥 Amigos"])
-    # 3. Agora você abre cada sub-aba usando o 'with' delas:
-with sub_aba_inventario:
-        # Coloque aqui dentro o código que lista as suas molduras e itens
+    # Segurança caso a variável meus_itens_perfil não venha carregada do banco
+    if 'meus_itens_perfil' not in locals() and 'meus_itens_perfil' not in globals():
+        meus_itens_perfil = user_atual.get('itens_exclusivos', []) or []
+
+    # Criando as sub-abas horizontais com o recuo correto
+    sub_aba_inventario, sub_aba_editar, sub_aba_convites, sub_aba_amigos = st.tabs(["🎒 Meu Inventário", "⚙️ Editar Perfil", "✉️ Convites", "👥 Amigos"])
+    
+    # --- SUB-ABA 1: INVENTÁRIO ---
+    with sub_aba_inventario:
         if meus_itens_perfil:
             itens_exib = list(set([i.replace("[EQUIPADO] ", "") for i in meus_itens_perfil if i]))
             for it in itens_exib:
@@ -610,14 +612,12 @@ with sub_aba_inventario:
                 with col_a:
                     if eq:
                         if st.button("Desequipar", key=f"d_{it}", use_container_width=True):
-                            # Tira o equipado, mas coloca o item normal de volta na lista
                             nl = [x for x in meus_itens_perfil if x != f"[EQUIPADO] {it}"]
                             if it not in nl: nl.append(it)
                             supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
                             st.rerun()
                     else:
                         if st.button("Equipar", key=f"e_{it}", use_container_width=True):
-                            # Desequipa a moldura anterior sem deletar ela da conta
                             nl = []
                             for x in meus_itens_perfil:
                                 if "Moldura" in x and "[EQUIPADO]" in x:
@@ -631,17 +631,18 @@ with sub_aba_inventario:
         else:
             st.info("Inventário vazio.")
 
-        with sub_aba_editar:
-            st.write("Configurações de edição do perfil aqui...")
-        # (coloque o resto do seu código original de editar aqui dentro)
+    # --- SUB-ABA 2: EDITAR PERFIL (Alinhado para fora do Inventário) ---
+    with sub_aba_editar:
+        st.write("Configurações de edição do perfil aqui...")
 
-        with sub_aba_convites:
-            st.write("Área de convites aqui...")
-        # (coloque o resto do seu código original de convites aqui dentro)
+    # --- SUB-ABA 3: CONVITES (Alinhado para fora do Inventário) ---
+    with sub_aba_convites:
+        st.write("Área de convites aqui...")
 
-        with sub_aba_amigos:
-            st.write("Lista de amigos aqui...")
-        # (coloque o resto do seu código original de amigos aqui dentro)
+    # --- SUB-ABA 4: AMIGOS (Alinhado para fora do Inventário) ---
+    with sub_aba_amigos:
+        st.write("Lista de amigos aqui...")
+    
 
 # --- 7. ABA VISITAR PERFIL ALHEIO ---
 if aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visited:
