@@ -4,36 +4,36 @@ import random
 import datetime
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Silver Tok v2", page_icon="🚀", layout="centered")
+st. set_page_config ( page_title= "Silver Tok v2" , page_icon= "🚀" , layout= "centered" )
 
 # --- CONEXÃO COM SUPABASE ---
 url = "https://ldjtqgeyorkzbvuichjj.supabase.co"
-key = "sb_publishable_ZWY9Hp6kQrhOzff6xc_DrA_8TlnrqQ_"
+chave = "sb_publishable_ZWY9Hp6kQrhOzff6xc_DrA_8TlnrqQ_"
 
-try:
-    supabase: Client = create_client(url, key)
-except Exception as e:
-    st.error(f"Erro crítico de conexão: {str(e)}")
-    st.stop()
+tentar :
+    supabase: Cliente = criar_cliente ( url, chave )
+exceto Exception como e:
+    rua. erro ( f"Erro crítico de conexão: { str ( e ) } " )
+parada     st. ( )
 
 # --- ESTADO DE DESENVOLVIMENTO ---
-ESTADO_DESENVOLVIMENTO = True 
+ESTADO_DESENVOLVIMENTO = Verdadeiro 
 
 # --- INICIALIZAÇÃO DA SESSÃO ---
-if "logado" not in st.session_state:
-    st.session_state.logado = False
-if "user_data" not in st.session_state:
-    st.session_state.user_data = None
-if "perfil_visitado" not in st.session_state:
-    st.session_state.perfil_visitado = None
-if "historico_ia" not in st.session_state:
-    st.session_state.historico_ia = []
+se  "logado"  não estiver  em st. session_state :
+    rua. estado_sessão . logado = Falso
+se  "user_data"  não estiver  em st. session_state :
+    st. session_state . user_data = None
+se  "perfil_visitado"  não estiver  em st. session_state :
+    rua. estado_sessão . perfil_visitado = Nenhum
+se  "historico_ia"  não estiver  em st. session_state :
+    st. session_state . historico_ia = [ ]
 
 # --- BANCO DE DADOS LOCAL DO CHAT E LIVES (Sessão Ativa) ---
-if "chat_privado_salas" not in st.session_state:
-    st.session_state.chat_privado_salas = {} 
-if "chat_grupos" not in st.session_state:
-    st.session_state.chat_grupos = {} 
+se  "chat_privado_salas"  não estiver  em st. session_state :
+    st. session_state . chat_privado_salas = { } 
+se  "chat_grupos"  não estiver  em st. session_state :
+    st. session_state . chat_grupos = { } 
 if "sala_privada_atual" not in st.session_state:
     st.session_state.sala_privada_atual = None
 if "codigo_grupo_atual" not in st.session_state:
@@ -568,15 +568,37 @@ elif aba_ativa == "🛒 Loja do Site":
             st.write("---")
 # --- 6. ABA MEU PERFIL ---
 elif aba_ativa == "👤 Meu Perfil":
-    # 1. Deixe as linhas originais do seu perfil rodarem primeiro (linhas 529 a 544 do seu print)
-    meus_itens_perfil = user_atual.get('itens_exclusivos', [])
-    if not isinstance(meus_itens_perfil, list): 
-        meus_itens_perfil = []
+# --- TOPO DO PERFIL: BANNER E FOTO DE PERFIL ---
+# Garante que os dados existam ou use padrões caso estejam vazios
+foto_url = user_atual.get('foto_perfil') or "https://via.placeholder.com/150"
+nickname = user_atual.get('nickname') or user_atual.get('username')
+cargo = user_atual.get('cargo') or "Membro"
+bio = user_atual.get('bio') or "Sem bio definida."
 
-    # ... (mantenha aqui os seus códigos de design de banner, col_foto e col_stats originais) ...
-    
-    st.write("---")
-    
+# Código CSS para renderizar o Banner e a Foto flutuando por cima
+st.markdown(
+    f"""
+    <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
+        <img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# --- INFORMAÇÕES DO USUÁRIO ---
+st.title(f"{nickname} ✨ [👑 DEV]")
+st.caption(f"@{user_atual.get('username')} | Cargo: {cargo}")
+st.write(f"*{bio}*")
+
+# Exibição de Seguidores (se houver no banco)
+seguidores_count = user_atual.get('seguidores', 0)
+seguindo_count = user_atual.get('seguindo', 0)
+st.markdown(f"**👥 {seguidores_count}** Seguidores │ **👤 {seguindo_count}** Seguindo")
+
+st.write("---")
+
+# --- AQUI COMEÇAM AS SUAS SUB-ABAS (sub_aba_inventario, sub_aba_editar, etc.) ---
+   
     # 2. ADICIONE ESSA LINHA AQUI para criar os botões das sub-abas na tela:
     sub_aba_inventario, sub_aba_editar, sub_aba_convites, sub_aba_amigos = st.tabs(["🎒 Meu Inventário", "⚙️ Editar Perfil", "✉️ Convites", "👥 Amigos"])
     
