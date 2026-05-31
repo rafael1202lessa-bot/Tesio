@@ -641,8 +641,8 @@ with sub_aba_inventario:
             st.write("Área de convites aqui...")
         # (coloque o resto do seu código original de convites aqui dentro)
 
-    with sub_aba_amigos:
-        st.write("Lista de amigos aqui...")
+        with sub_aba_amigos:
+            st.write("Lista de amigos aqui...")
         # (coloque o resto do seu código original de amigos aqui dentro)
 
 # --- 7. ABA VISITAR PERFIL ALHEIO ---
