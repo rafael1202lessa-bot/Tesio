@@ -376,6 +376,56 @@ elif aba_ativa == "🎥 Gravar/Postar":
                             st.rerun()
 
 # --- 3. ABA CHAT EXV ---
+elif aba_ativa == "💬 Chat EXV":
+    st.title("💬 Chat EXV")
+    aba_dm, aba_grp = st.tabs(["🔒 Conversas Privadas", "👥 Grupos por Código"])
+    
+    with aba_dm:
+        try:
+            todos_req = supabase.table("perfis_usuarios").select("username, nickname").execute()
+            lista_usuarios = [u for u in todos_req.data if u['username'] != user_atual.get('username')]
+        except: 
+            lista_usuarios = []
+        
+        if lista_usuarios:
+            opcoes_usuarios = {u['username']: f"{u['nickname']} (@{u['username']})" for u in lista_usuarios}
+            usuario_selecionado = st.selectbox("Abrir sala com:", list(opcoes_usuarios.keys()), format_func=lambda x: opcoes_usuarios[x])
+            if st.button("🚪 Entrar na Sala Privada", use_container_width=True):
+                st.session_state.sala_privada_atual = obter_id_sala_privada(user_atual.get('username'), usuario_selecionado)
+                st.session_state.codigo_grupo_atual = None
+        
+        if st.session_state.sala_privada_atual:
+            sala_id = st.session_state.sala_privada_atual
+            outro_usuario = sala_id.replace(user_atual.get('username'), "").replace("_", "")
+            st.markdown(f"### 💬 Sala: **@{user_atual.get('username')}** & **@{outro_usuario}**")
+            
+            if sala_id not in st.session_state.chat_privado_salas: 
+                st.session_state.chat_privado_salas[sala_id] = []
+                
+            for msg in st.session_state.chat_privado_salas[sala_id]:
+                # --- BUSCA A FOTO DO REMETENTE DA MENSAGEM ---
+                foto_avatar = "https://img.icons8.com/colors/150/test-account.png"
+                if msg['remetente'] == user_atual.get('username'):
+                    if user_atual.get('foto_perfil') and str(user_atual.get('foto_perfil')).startswith("http"):
+                        foto_avatar = user_atual.get('foto_perfil')
+                else:
+                    try:
+                        outro_req = supabase.table("perfis_usuarios").select("foto_perfil").eq("username", msg['remetente']).execute()
+                        if outro_req.data and outro_req.data[0].get('foto_perfil'):
+                            if str(outro_req.data[0].get('foto_perfil')).startswith("http"):
+                                foto_avatar = outro_req.data[0].get('foto_perfil')
+                    except:
+                        pass
+                
+                # --- EXIBE O BALÃO COM A FOTO CORRETA ---
+                with st.chat_message("user" if msg['remetente'] == user_atual.get('username') else "assistant", avatar=foto_avatar):
+                    st.write(f"**@{msg['remetente']}:** {msg['conteudo']}")
+            
+            txt = st.text_input("Mensagem:", key="msg_p_input")
+            if st.button("Enviar", use_container_width=True) and txt:
+                st.session_state.chat_privado_salas[sala_id].append({"remetente": user_atual.get('username'), "conteudo": txt})
+                st.rerun()
+
     with aba_grp:
         st.subheader("👥 Grupos por Código")
         cg1, cg2 = st.columns(2)
@@ -399,53 +449,6 @@ elif aba_ativa == "🎥 Gravar/Postar":
             msg_g = st.text_input("Escrever...", key="input_msg_grp")
             if st.button("Enviar Grupo") and msg_g:
                 st.session_state.chat_grupos[cod_g]['mensagens'].append({"remetente": user_atual.get('username'), "conteudo": msg_g})
-                st.rerun()
-                    
-            if st.button("❌ Fechar Sala Privada", use_container_width=True):
-                st.session_state.sala_privada_atual = None
-                st.rerun()
-
-    with aba_grp:
-        st.subheader("👥 Grupos Protegidos por Código")
-        cg1, cg2 = st.columns(2)
-        with cg1:
-            st.markdown("### Criar Novo Grupo")
-            nome_novo_grp = st.text_input("Nome do Grupo:")
-            cod_novo_grp = st.text_input("Criar Código de Acesso Secreto:", type="password", key="new_grp_cod")
-            if st.button("🏗️ Gerar Sala de Grupo", use_container_width=True):
-                if nome_novo_grp and cod_novo_grp:
-                    st.session_state.chat_grupos[cod_novo_grp] = {"nome": nome_novo_grp, "mensagens": []}
-                    st.success(f"Grupo '{nome_novo_grp}' criado!")
-                else: st.warning("Preencha todos os campos do grupo.")
-                
-        with cg2:
-            st.markdown("### Entrar em um Grupo")
-            cod_inserido = st.text_input("Digitar Código de Acesso do Grupo:", type="password", key="join_grp_cod")
-            if st.button("🚪 Entrar no Grupo", use_container_width=True):
-                if cod_inserido in st.session_state.chat_grupos:
-                    st.session_state.codigo_grupo_atual = cod_inserido
-                    st.session_state.sala_privada_atual = None
-                    st.success(f"Conectado ao grupo: {st.session_state.chat_grupos[cod_inserido]['nome']}")
-                else: st.error("Código de grupo incorreto ou inexistente!")
-                
-        if st.session_state.codigo_grupo_atual:
-            cod_g = st.session_state.codigo_grupo_atual
-            dados_grupo = st.session_state.chat_grupos[cod_g]
-            
-            st.write("---")
-            st.markdown(f"### 👥 Sala de Grupo Ativa: **{dados_grupo['nome']}**")
-            
-            for m_g in dados_grupo['mensagens']:
-                with st.chat_message("user" if m_g['remetente'] == user_atual.get('username') else "assistant"):
-                    st.write(f"**@{m_g['remetente']}:** {m_g['conteudo']}")
-                    
-            msg_para_enviar_grp = st.text_input("Escrever no grupo...", key="input_msg_grp")
-            if st.button("Enviar para o Grupo", use_container_width=True) and msg_para_enviar_grp:
-                st.session_state.chat_grupos[cod_g]['mensagens'].append({"remetente": user_atual.get('username'), "conteudo": msg_para_enviar_grp})
-                st.rerun()
-                
-            if st.button("❌ Sair do Grupo", use_container_width=True):
-                st.session_state.codigo_grupo_atual = None
                 st.rerun()
 
 # --- 4. ABA SILVER IA ---
