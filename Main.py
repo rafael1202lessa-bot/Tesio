@@ -10,7 +10,7 @@ st. set_page_config ( page_title= "Silver Tok v2" , page_icon= "🚀" , layout= 
 url = "https://ldjtqgeyorkzbvuichjj.supabase.co"
 chave = "sb_publishable_ZWY9Hp6kQrhOzff6xc_DrA_8TlnrqQ_"
 
- try:
+try:
     supabase: Cliente = criar_cliente ( url, chave )
 exceto Exception como e:
     rua. erro ( f"Erro crítico de conexão: { str ( e ) } " )
