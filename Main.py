@@ -599,8 +599,7 @@ st.write("---")
 # --- AQUI COMEÇAM AS SUAS SUB-ABAS (sub_aba_inventario, sub_aba_editar, etc.) ---
    
     # 2. ADICIONE ESSA LINHA AQUI para criar os botões das sub-abas na tela:
-    sub_aba_inventario, sub_aba_editar, sub_aba_convites, sub_aba_amigos = st.tabs(["🎒 Meu Inventário", "⚙️ Editar Perfil", "✉️ Convites", "👥 Amigos"])
-    
+sub_aba_inventario, sub_aba_editar, sub_aba_convites, sub_aba_amigos = st.tabs(["🎒 Meu Inventário", "⚙️ Editar Perfil", "✉️ Convites", "👥 Amigos"])
     # 3. Agora você abre cada sub-aba usando o 'with' delas:
     with sub_aba_inventario:
         # Coloque aqui dentro o código que lista as suas molduras e itens
