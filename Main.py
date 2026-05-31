@@ -567,25 +567,33 @@ elif aba_ativa == "🛒 Loja do Site":
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
             
-                        # --- INVENTÁRIO CORRIGIDO ---
-            supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
-            st.rerun()
-    else:
-                if st.button("Equipar", key=f"e_{it}", use_container_width=True):
-                    nl = []
-                    for x in meus_itens_perfil:
-                        if "Moldura" in x and "[EQUIPADO]" in x:
-                            nl.append(x.replace("[EQUIPADO] ", ""))
+                                            # === CÓDIGO COMPLETO DO INVENTÁRIO (ALINHADO) ===
+                    for it in meus_itens_perfil:
+                        if "[EQUIPADO]" in it:
+                            if st.button("Desequipar", key=f"d_{it}", use_container_width=True):
+                                nl = [x for x in meus_itens_perfil if x != it]
+                                supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                                st.rerun()
                         else:
-                            nl.append(x)
-                    if it in nl: 
-                        nl.remove(it)
-                    nl.append(f"[EQUIPADO] {it}")
-                    supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
-                    st.rerun()        
+                            if st.button("Equipar", key=f"e_{it}", use_container_width=True):
+                                nl = []
+                                for x in meus_itens_perfil:
+                                    if "Moldura" in x and "[EQUIPADO]" in x:
+                                        nl.append(x.replace("[EQUIPADO] ", ""))
+                                    else:
+                                        nl.append(x)
+                                
+                                # O 'if' correto rodando ANTES do envio ao banco
+                                if it in nl: 
+                                    nl.remove(it)
+                                
+                                nl.append(f"[EQUIPADO] {it}")
+                                supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                                st.rerun()
         else:
+            # Este 'else' fecha o bloco principal (Inventário vazio)
             st.info("Inventário vazio.")
-                
+                  
     with sub_aba_editar:
         n_nick = st.text_input("Nickname:", value=user_atual.get('nickname'))
         n_foto = st.text_input("URL Foto:", value=user_atual.get('foto_perfil'))
