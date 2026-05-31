@@ -566,245 +566,50 @@ elif aba_ativa == "🛒 Loja do Site":
                             else: 
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
-     # --- 6. ABA MEU PERFIL (SINCRONIZADO COM SUPABASE) ---
+     
+                        
+        # --- 6. ABA MEU PERFIL (SINCRONIZADO COM SUPABASE) ---
 elif aba_ativa == "👤 Meu Perfil":
-                         
-            # ==========================================================
-    # --- BLOCO 3: DESIGN DO BANNER E ITENS COMPRÁVEIS ---
-    # ==========================================================
-    
-    # 🎫 CÁTALOGO DE MOLDURAS FIXAS DO SILVER TOK
+    # 🎫 CÁTALOGO DE MOLDURAS EXCLUSIVAS
     catalogo_molduras = {
         "Moldura angelical": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura-anjo.png",
-        "Moldura Cyberpunk": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_cyber.png",
-        "Moldura de Cavaleiro": "",       
-        "Moldura de Dragão Branco": ""     
+        "Moldura Cyberpunk": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_cyber.png"
     }
 
-    # 🛡️ DICIONÁRIOS DE COMPATIBILIDADE (Para evitar quebras no restante do script)
-    estilos_banners = {
-        "Padrão": "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
-        "Cavaleiro": "linear-gradient(135deg, #2c3e50 0%, #0f2027 100%)",
-        "Dragão": "linear-gradient(135deg, #e0e0e0 0%, #ffffff 50%, #b0c4de 100%)"
-    }
-    banner_background = estilos_banners["Padrão"]
-
-    estilos_caixas_nome = {
-        "Normal": "background: transparent; border: none;",
-        "Cavaleiresca": "background: #1a1c23; border: 3px solid;"
-    }
-
-    estilos_caixas_mensagem = {
-        "Normal": "background: transparent; border: none; padding: 0;",
-        "Personalizada": "background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 10px;"
-    }
-
-    # Link da imagem de perfil
-    foto_url = user_atual.get('foto_url', '')
-    if not foto_url or str(foto_url).strip() in ["0", "None", ""]: 
-        foto_url = "https://img.icons8.com/colors/150/test-account.png"
-
-    # Varre o inventário para ver o que está ativo
-    link_moldura = None
-    nome_moldura_ativa = ""
-    caixa_nome_equipada = False
-
-    if 'meus_itens_perfil' not in locals() or meus_itens_perfil is None:
+    # 1. BUSCA FRESCA NO BANCO: Força o app a ler o inventário direto do Supabase para pegar compras novas
+    try:
+        dados_frescos = supabase.table("perfis_usuarios").select("itens_exclusivos, foto_perfil").eq("username", user_atual.get('username')).execute()
+        if dados_frescos.data:
+            meus_itens_perfil = dados_frescos.data[0].get('itens_exclusivos', [])
+            foto_url = dados_frescos.data[0].get('foto_perfil', '')
+        else:
+            meus_itens_perfil = user_atual.get('itens_exclusivos', [])
+            foto_url = user_atual.get('foto_perfil', '')
+    except Exception:
         meus_itens_perfil = user_atual.get('itens_exclusivos', [])
-    if not isinstance(meus_itens_perfil, list):
+        foto_url = user_atual.get('foto_perfil', '')
+
+    # Limpeza de segurança na lista
+    if not isinstance(meus_itens_perfil, list): 
         meus_itens_perfil = []
-        
     meus_itens_perfil = [x for x in meus_itens_perfil if x]
 
-    for item in meus_itens_perfil:
-        if "[EQUIPADO]" in item:
-            nome_limpo = item.replace("[EQUIPADO] ", "")
-            if "Moldura" in nome_limpo:
-                nome_moldura_ativa = nome_limpo
-                link_moldura = catalogo_molduras.get(nome_limpo)
-            if nome_limpo == "Caixa Cavaleiresca":
-                caixa_nome_equipada = True
-
-    # --- RENDERIZAÇÃO ÚNICA DO BANNER TEMÁTICO ---
-    if nome_moldura_ativa == "Moldura de Cavaleiro":
-        banner_background = estilos_banners["Cavaleiro"]
-        st.markdown(f'''
-            <div style="position: relative; width: 100%; height: 180px; background: {banner_background}; border-radius: 15px; margin-bottom: 50px; overflow: hidden;">
-                <!-- 🛡️ BRASÃO DE ARMAS EM CSS -->
-                <div style="position: absolute; right: 40px; top: 50%; transform: translateY(-50%); width: 90px; height: 110px; background: linear-gradient(135deg, #e0e0e0 0%, #b8b8b8 100%); border: 4px solid #7f8c8d; border-radius: 10px 10px 45px 45px; box-shadow: 0px 5px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;">
-                    <div style="position: absolute; width: 45px; height: 45px; background: #f1c40f; border-radius: 50%; box-shadow: 0 0 15px #f39c12; z-index: 1;"></div>
-                    <div style="position: absolute; width: 6px; height: 85px; background: #ecf0f1; border-left: 2px solid #bdc3c7; transform: rotate(45deg); z-index: 2;">
-                        <div style="position: absolute; top: 20px; left: -8px; width: 22px; height: 5px; background: #d35400; border-radius: 2px;"></div>
-                        <div style="position: absolute; top: 5px; left: 1px; width: 4px; height: 15px; background: #2c3e50;"></div>
-                    </div>
-                </div>
-                <!-- 👤 FOTO DO PERFIL -->
-                <div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;">
-                    <img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;">
-                    {"".join(f'<img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 2;">' if link_moldura else "")}
-                </div>
-            </div>
-        ''', unsafe_allow_html=True)
-
-    elif nome_moldura_ativa == "Moldura de Dragão Branco":
-        banner_background = estilos_banners["Dragão"]
-        st.markdown(f'''
-            <div style="position: relative; width: 100%; height: 180px; background: {banner_background}; border-radius: 15px; margin-bottom: 50px; overflow: visible; box-shadow: 0 0 20px rgba(255,255,255,0.6);">
-                <!-- Elementos do Dragão Branco em CSS -->
-                <div style="position: absolute; top: -15px; left: -25px; width: 150px; height: 60px; z-index: 0; pointer-events: none; display: flex; justify-content: space-between;">
-                    <div style="width: 45px; height: 45px; background: #fff; border: 2px solid #b0c4de; border-radius: 0 100% 0 100%; transform: rotate(-15deg);"></div>
-                    <div style="width: 45px; height: 45px; background: #fff; border: 2px solid #b0c4de; border-radius: 100% 0 100% 0; transform: rotate(15deg);"></div>
-                </div>
-                <div style="position: absolute; bottom: -20px; right: -15px; width: 40px; height: 40px; border-bottom: 6px solid #fff; border-right: 6px solid #b0c4de; border-radius: 0 0 40px 0; transform: rotate(20deg); z-index: 0;"></div>
-                
-                <div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;">
-                    <img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;">
-                    {"".join(f'<img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 2;">' if link_moldura else "")}
-                </div>
-            </div>
-        ''', unsafe_allow_html=True)
-
-    else:
-        if link_moldura:
-            st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: {banner_background}; border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
-        else:
-            st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: {banner_background}; border-radius: 15px; margin-bottom: 50px;"><img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);"></div>', unsafe_allow_html=True)
-
-    # ==========================================================
-    # --- BLOCO 5: EXIBIÇÃO DO NOME E CAIXA CAVALEIRESCA ---
-    # ==========================================================
-    selo_meu_perfil, _ = aplicar_moldura_e_selo(user_atual.get('username'), user_atual.get('titulo'), meus_itens_perfil, user_atual.get('seguidores', 0))
-    nickname_usuario = user_atual.get('nickname', 'Usuário')
-
-    if caixa_nome_equipada:
-        st.markdown(f'''
-            <div style="position: relative; margin-top: 15px; margin-bottom: 15px; padding: 15px 30px; background: #1a1c23; border: 3px solid; border-image: linear-gradient(135deg, #d4af37, #e5e5e5, #aa7c11, #b4b4b4) 1; border-radius: 8px; box-shadow: 0px 4px 15px rgba(0,0,0,0.4); display: inline-block; min-width: 250px; overflow: hidden;">
-                <div style="position: absolute; top: 50%; left: 5%; transform: translateY(-50%) rotate(25deg); width: 90%; height: 4px; background: rgba(200,200,200,0.15); z-index: 1;">
-                    <div style="position: absolute; left: 0; top: -4px; width: 12px; height: 12px; background: #aa7c11; border-radius: 50%;"></div>
-                </div>
-                <div style="position: absolute; top: 50%; left: 5%; transform: translateY(-50%) rotate(-25deg); width: 90%; height: 4px; background: rgba(200,200,200,0.15); z-index: 1;">
-                    <div style="position: absolute; right: 0; top: -4px; width: 12px; height: 12px; background: #aa7c11; border-radius: 50%;"></div>
-                </div>
-                <div style="position: relative; z-index: 2; font-size: 26px; font-weight: bold; color: #ffffff; text-shadow: 0px 2px 4px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 10px;">
-                    <span>{nickname_usuario}</span>
-                    <span style="font-size: 20px;">{selo_meu_perfil}</span>
-                </div>
-            </div>
-        ''', unsafe_allow_html=True)
-    else:
-        st.header(f"{nickname_usuario}{selo_meu_perfil}")
-    
-    st.caption(f"🆔 **@{user_atual.get('username', '')}** | Cargo: *{user_atual.get('titulo', 'Usuário')}*")
-    
-    # 🌟 ATENÇÃO: Verifique se abaixo dessa linha restou algum "st.write", "st.code" ou blocos antigos de banner repetidos e apague-os até chegar na área das estatísticas de seguidores/posts!
-                
-    # ==========================================================
-    # --- PROCESSO DE CHECAGEM DOS ITENS EQUIPADOS ---
-    # ==========================================================
+    # 2. IDENTIFICAÇÃO DINÂMICA DA MOLDURA ATIVA
     link_moldura = None
-    nome_moldura_ativa = ""
-    banner_background = estilos_banners["Padrão"]
-    estilo_nome_ativo = estilos_caixas_nome["Normal"]
-    estilo_msg_ativo = estilos_caixas_mensagem["Normal"]
-    
-    caixa_nome_equipada = False
-    caixa_nome_custom_css = ""
-
-    # Garante segurança da lista de itens
-    if 'meus_itens_perfil' not in locals() or meus_itens_perfil is None:
-        meus_itens_perfil = user_atual.get('itens_exclusivos', [])
-    if not isinstance(meus_itens_perfil, list):
-        meus_itens_perfil = []
-
     for item in meus_itens_perfil:
-        if "[EQUIPADO]" in item:
-            nome_limpo = item.replace("[EQUIPADO] ", "")
-            
-            # Varre Molduras
-            if "Moldura" in nome_limpo:
-                nome_moldura_ativa = nome_limpo
-                link_moldura = catalogo_molduras.get(nome_limpo)
-            
-            # Varre Banners
-            if nome_limpo in estilos_banners:
-                banner_background = estilos_banners[nome_limpo]
-            elif "Banner" in nome_limpo: # Fallback automático por número
-                banner_background = estilos_banners.get(nome_limpo, estilos_banners["Padrão"])
+        if "[EQUIPADO]" in item and "Moldura" in item:
+            nome_da_moldura = item.replace("[EQUIPADO] ", "")
+            link_moldura = catalogo_molduras.get(nome_da_moldura)
 
-            # Varre Caixas de Nome
-            if nome_limpo == "Caixa Cavaleiresca":
-                caixa_nome_equipada = True
-            elif nome_limpo in estilos_caixas_nome or "Caixa Nome" in nome_limpo:
-                caixa_nome_custom_css = estilos_caixas_nome.get(nome_limpo, estilos_caixas_nome["Normal"])
-
-            # Varre Caixas de Mensagem
-            if nome_limpo in estilos_caixas_mensagem or "Mensagem" in nome_limpo:
-                estilo_msg_ativo = estilos_caixas_mensagem.get(nome_limpo, estilos_caixas_mensagem["Normal"])
-
-    # Ajuste automático do Banner baseado na moldura clássica caso o usuário não tenha banner comprado separado
-    if banner_background == estilos_banners["Padrão"]:
-        if nome_moldura_ativa == "Moldura de Cavaleiro":
-            banner_background = estilos_banners["Banner de Cavaleiro"]
-        elif nome_moldura_ativa == "Moldura de Dragão Branco":
-            banner_background = estilos_banners["Banner de Dragão Branco"]
-
-    # Tratamento seguro da foto
+    # Tratamento da URL da foto de perfil
     if not foto_url or str(foto_url).strip() in ["0", "None", ""]: 
         foto_url = "https://img.icons8.com/colors/150/test-account.png"
 
-
-    # ==========================================================
-    # --- RENDERIZAÇÃO DO BANNER ---
-    # ==========================================================
-    st.markdown(f'''
-        <div style="position: relative; width: 100%; height: 180px; background: {banner_background}; border-radius: 15px; margin-bottom: 50px; overflow: visible; box-shadow: 0px 4px 15px rgba(0,0,0,0.2);">
-            
-            <!-- ⚔️ SE FOR TEMA CAVALEIRO, MOSTRA O BRASÃO NO BANNER -->
-            {'''<div style="position: absolute; right: 40px; top: 50%; transform: translateY(-50%); width: 90px; height: 110px; background: linear-gradient(135deg, #e0e0e0 0%, #b8b8b8 100%); border: 4px solid #7f8c8d; border-radius: 10px 10px 45px 45px; display: flex; align-items: center; justify-content: center; z-index:1;"><div style="position: absolute; width: 45px; height: 45px; background: #f1c40f; border-radius: 50%;"></div><div style="position: absolute; width: 6px; height: 85px; background: #ecf0f1; transform: rotate(45deg);"></div></div>''' if nome_moldura_ativa == "Moldura de Cavaleiro" else ""}
-            
-            <!-- 🐉 SE FOR TEMA DRAGÃO, ADICIONA AS ASAS POR TRÁS -->
-            {'''<div style="position: absolute; top: -15px; left: -25px; width: 150px; height: 60px; z-index: 0; display: flex; justify-content: space-between;"><div style="width: 45px; height: 45px; background: #fff; border: 2px solid #b0c4de; border-radius: 0 100% 0 100%; transform: rotate(-15deg);"></div><div style="width: 45px; height: 45px; background: #fff; border: 2px solid #b0c4de; border-radius: 100% 0 100% 0; transform: rotate(15deg);"></div></div>''' if nome_moldura_ativa == "Moldura de Dragão Branco" else ""}
-
-            <!-- 👤 RECIPIENTE DA FOTO + MOLDURA CENTRALIZADA NO MEIO -->
-            <div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;">
-                <img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;">
-                {"".join(f'<img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 2;">' if link_moldura else "")}
-            </div>
-        </div>
-    ''', unsafe_allow_html=True)
-
-
-    # ==========================================================
-    # --- RENDERIZAÇÃO DA CAIXA DE NOME ---
-    # ==========================================================
-    selo_meu_perfil, _ = aplicar_moldura_e_selo(user_atual.get('username'), user_atual.get('titulo'), meus_itens_perfil, user_atual.get('seguidores', 0))
-    nickname_usuario = user_atual.get('nickname', 'Usuário')
-
-    if caixa_nome_equipada:
-        # Mantém o design premium da caixa cavaleiresca que você pediu
-        st.markdown(f'''
-            <div style="position: relative; margin-top: 15px; margin-bottom: 15px; padding: 15px 30px; background: #1a1c23; border: 3px solid; border-image: linear-gradient(135deg, #d4af37, #e5e5e5, #aa7c11, #b4b4b4) 1; border-radius: 8px; box-shadow: 0px 4px 15px rgba(0,0,0,0.4); display: inline-block; min-width: 250px; overflow: hidden;">
-                <div style="position: absolute; top: 50%; left: 5%; transform: translateY(-50%) rotate(25deg); width: 90%; height: 4px; background: rgba(200,200,200,0.15); z-index: 1;"><div style="position: absolute; left: 0; top: -4px; width: 12px; height: 12px; background: #aa7c11; border-radius: 50%;"></div></div>
-                <div style="position: absolute; top: 50%; left: 5%; transform: translateY(-50%) rotate(-25deg); width: 90%; height: 4px; background: rgba(200,200,200,0.15); z-index: 1;"><div style="position: absolute; right: 0; top: -4px; width: 12px; height: 12px; background: #aa7c11; border-radius: 50%;"></div></div>
-                <div style="position: relative; z-index: 2; font-size: 26px; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 10px;">
-                    <span>{nickname_usuario}</span> <span style="font-size: 20px;">{selo_meu_perfil}</span>
-                </div>
-            </div>
-        ''', unsafe_allow_html=True)
-    elif caixa_nome_custom_css:
-        # Renderiza dinamicamente qualquer uma das outras caixas de nome de 3 a 20
-        st.markdown(f'<div style="padding: 10px 20px; display: inline-block; font-size: 24px; font-weight: bold; {caixa_nome_custom_css}">{nickname_usuario} {selo_meu_perfil}</div>', unsafe_allow_html=True)
-    else:
-        st.header(f"{nickname_usuario}{selo_meu_perfil}")
-        
-    st.caption(f"🆔 **@{user_atual.get('username', '')}** | Cargo: *{user_atual.get('titulo', 'Usuário')}*")
-                                                            
     # ==========================================================
     # --- RENDERIZAÇÃO DO BANNER PREMIUM ---
     # ==========================================================
-              # HTML definitivo com centralização absoluta automática no meio
     if link_moldura:
-        st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: -29px; left: -28px; pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);"></div>', unsafe_allow_html=True)
 
@@ -900,7 +705,7 @@ elif aba_ativa == "👤 Meu Perfil":
                     la.append(amg_add)
                     supabase.table("perfis_usuarios").update({"lista_amigos": la, "seguindo": user_atual.get('seguindo', 0) + 1}).eq("username", user_atual.get('username')).execute()
                     st.success("Seguindo!")
-                    st.rerun()
+                    st.rerun()    
               
 # --- 7. ABA VISITAR PERFIL ALHEIO ---
 if aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visited:
