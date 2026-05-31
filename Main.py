@@ -602,7 +602,7 @@ elif aba_ativa and "Perfil" in aba_ativa:
     # 🎫 CÁTALOGO DE MOLDURAS DO SILVER TOK
     # Quando criar uma moldura nova, basta adicionar ela aqui embaixo!
     catalogo_molduras = {
-        "Moldura angelical": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/main/moldura_anjo.png",
+        "Moldura angelical": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/main/moldura-anjo.png",
         "Moldura de Fogo 🔥": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/main/moldura_fogo.png",
         "Moldura Cyberpunk": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/main/moldura_cyber.png"
 }
