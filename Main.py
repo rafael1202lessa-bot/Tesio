@@ -633,7 +633,7 @@ with sub_aba_inventario:
         else:
             st.info("Inventário vazio.")
 
-    with sub_aba_editar:
+        with sub_aba_editar:
         st.write("Configurações de edição do perfil aqui...")
         # (coloque o resto do seu código original de editar aqui dentro)
 
