@@ -570,7 +570,8 @@ elif aba_ativa == "🛒 Loja do Site":
 elif aba_ativa == "👤 Meu Perfil":
     # ==========================================================
     # --- BLOCO 3: DESIGN DO BANNER E ITENS COMPRÁVEIS ---
-    # ========================================================== 
+    # ==========================================================
+    
     # 🎫 CÁTALOGO DE MOLDURAS FIXAS DO SILVER TOK
     catalogo_molduras = {
         "Moldura angelical": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura-anjo.png",
@@ -579,13 +580,19 @@ elif aba_ativa == "👤 Meu Perfil":
         "Moldura de Dragão Branco": ""     
     }
 
-    # 🛡️ COMPATIBILIDADE: Recria o dicionário que o seu código original exige abaixo
+    # 🛡️ COMPATIBILIDADE PARTE 1: Dicionário e Variável de Banners Exigidos pelo Legado
     estilos_banners = {
         "Padrão": "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
         "Cavaleiro": "linear-gradient(135deg, #2c3e50 0%, #0f2027 100%)",
         "Dragão": "linear-gradient(135deg, #e0e0e0 0%, #ffffff 50%, #b0c4de 100%)"
     }
-    banner_background = estilos_banners["Padrão"] # Definição padrão segura
+    banner_background = estilos_banners["Padrão"] # Definição segura inicial
+
+    # 🛡️ COMPATIBILIDADE PARTE 2: Dicionário de Caixas de Nome (Resolve o erro do print 4755/4756)
+    estilos_caixas_nome = {
+        "Normal": "background: transparent; border: none;",
+        "Cavaleiresca": "background: #1a1c23; border: 3px solid;"
+    }
 
     # Link da imagem de perfil
     foto_url = user_atual.get('foto_url', '')
@@ -653,7 +660,6 @@ elif aba_ativa == "👤 Meu Perfil":
         ''', unsafe_allow_html=True)
 
     else:
-        # Se for a moldura padrão ou as outras clássicas
         if link_moldura:
             st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: {banner_background}; border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
         else:
