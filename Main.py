@@ -570,8 +570,8 @@ elif aba_ativa == "🛒 Loja do Site":
 elif aba_ativa == "👤 Meu Perfil":
     # ==========================================================
     # --- BLOCO 3: DESIGN DO BANNER E ITENS COMPRÁVEIS ---
-    # ==========================================================
-    # 🎫 CÁTALOGO DE MOLDURAS FIXAS DO SILVER TOK (Pronto sem links externos!)
+    # ========================================================== 
+    # 🎫 CÁTALOGO DE MOLDURAS FIXAS DO SILVER TOK
     catalogo_molduras = {
         "Moldura angelical": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura-anjo.png",
         "Moldura Cyberpunk": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_cyber.png",
@@ -579,19 +579,24 @@ elif aba_ativa == "👤 Meu Perfil":
         "Moldura de Dragão Branco": ""     
     }
 
-    # 🔗 DEFINE A VARIÁVEL QUE ESTAVA DANDO ERRO (Puxa direto do user_atual)
-    foto_url = user_atual.get('foto_url', '')
+    # 🛡️ COMPATIBILIDADE: Recria o dicionário que o seu código original exige abaixo
+    estilos_banners = {
+        "Padrão": "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
+        "Cavaleiro": "linear-gradient(135deg, #2c3e50 0%, #0f2027 100%)",
+        "Dragão": "linear-gradient(135deg, #e0e0e0 0%, #ffffff 50%, #b0c4de 100%)"
+    }
+    banner_background = estilos_banners["Padrão"] # Definição padrão segura
 
-    # Se a foto vier zerada, nula ou vazia, joga o avatar padrão do sistema
+    # Link da imagem de perfil
+    foto_url = user_atual.get('foto_url', '')
     if not foto_url or str(foto_url).strip() in ["0", "None", ""]: 
         foto_url = "https://img.icons8.com/colors/150/test-account.png"
 
-    # Varre o inventário para ver o que está ativo (Molduras e Caixas de Nome)
+    # Varre o inventário para ver o que está ativo
     link_moldura = None
     nome_moldura_ativa = ""
     caixa_nome_equipada = False
 
-    # Trava de segurança para a lista de itens
     if 'meus_itens_perfil' not in locals() or meus_itens_perfil is None:
         meus_itens_perfil = user_atual.get('itens_exclusivos', [])
     if not isinstance(meus_itens_perfil, list):
@@ -599,7 +604,6 @@ elif aba_ativa == "👤 Meu Perfil":
         
     meus_itens_perfil = [x for x in meus_itens_perfil if x]
 
-    # Identifica o que está equipado
     for item in meus_itens_perfil:
         if "[EQUIPADO]" in item:
             nome_limpo = item.replace("[EQUIPADO] ", "")
@@ -609,10 +613,11 @@ elif aba_ativa == "👤 Meu Perfil":
             if nome_limpo == "Caixa Cavaleiresca":
                 caixa_nome_equipada = True
 
-    # --- RENDERIZAÇÃO DO BANNER DINÂMICO ---
+    # --- RENDERIZAÇÃO DO BANNER TEMÁTICO ---
     if nome_moldura_ativa == "Moldura de Cavaleiro":
+        banner_background = estilos_banners["Cavaleiro"]
         st.markdown(f'''
-            <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #2c3e50 0%, #0f2027 100%); border-radius: 15px; margin-bottom: 50px; overflow: hidden;">
+            <div style="position: relative; width: 100%; height: 180px; background: {banner_background}; border-radius: 15px; margin-bottom: 50px; overflow: hidden;">
                 <!-- 🛡️ BRASÃO DE ARMAS EM CSS -->
                 <div style="position: absolute; right: 40px; top: 50%; transform: translateY(-50%); width: 90px; height: 110px; background: linear-gradient(135deg, #e0e0e0 0%, #b8b8b8 100%); border: 4px solid #7f8c8d; border-radius: 10px 10px 45px 45px; box-shadow: 0px 5px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;">
                     <div style="position: absolute; width: 45px; height: 45px; background: #f1c40f; border-radius: 50%; box-shadow: 0 0 15px #f39c12; z-index: 1;"></div>
@@ -630,8 +635,9 @@ elif aba_ativa == "👤 Meu Perfil":
         ''', unsafe_allow_html=True)
 
     elif nome_moldura_ativa == "Moldura de Dragão Branco":
+        banner_background = estilos_banners["Dragão"]
         st.markdown(f'''
-            <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #e0e0e0 0%, #ffffff 50%, #b0c4de 100%); border-radius: 15px; margin-bottom: 50px; overflow: visible; box-shadow: 0 0 20px rgba(255,255,255,0.6);">
+            <div style="position: relative; width: 100%; height: 180px; background: {banner_background}; border-radius: 15px; margin-bottom: 50px; overflow: visible; box-shadow: 0 0 20px rgba(255,255,255,0.6);">
                 <!-- Elementos do Dragão Branco em CSS -->
                 <div style="position: absolute; top: -15px; left: -25px; width: 150px; height: 60px; z-index: 0; pointer-events: none; display: flex; justify-content: space-between;">
                     <div style="width: 45px; height: 45px; background: #fff; border: 2px solid #b0c4de; border-radius: 0 100% 0 100%; transform: rotate(-15deg);"></div>
@@ -647,11 +653,11 @@ elif aba_ativa == "👤 Meu Perfil":
         ''', unsafe_allow_html=True)
 
     else:
+        # Se for a moldura padrão ou as outras clássicas
         if link_moldura:
-            st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: {banner_background}; border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
         else:
-            st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);"></div>', unsafe_allow_html=True)
-
+            st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: {banner_background}; border-radius: 15px; margin-bottom: 50px;"><img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);"></div>', unsafe_allow_html=True)
 
     # ==========================================================
     # --- BLOCO 5: EXIBIÇÃO DO NOME E CAIXA CAVALEIRESCA ---
@@ -679,8 +685,6 @@ elif aba_ativa == "👤 Meu Perfil":
     
     st.caption(f"🆔 **@{user_atual.get('username', '')}** | Cargo: *{user_atual.get('titulo', 'Usuário')}*")
     
-
-
     # ==========================================================
     # --- PROCESSO DE CHECAGEM DOS ITENS EQUIPADOS ---
     # ==========================================================
