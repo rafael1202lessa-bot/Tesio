@@ -599,7 +599,7 @@ elif aba_ativa and "Perfil" in aba_ativa:
 
     
     # ==========================================
-    # --- 3. DESIGN DO BANNER PREMIUM (CORRIGIDO) ---
+    # --- 3. DESIGN DO BANNER PREMIUM (SUPER EXPANSÃO) ---
     # ==========================================
     
     # 🎫 CÁTALOGO DE MOLDURAS DO SILVER TOK
@@ -615,20 +615,24 @@ elif aba_ativa and "Perfil" in aba_ativa:
             nome_da_moldura = item.replace("[EQUIPADO] ", "")
             link_moldura = catalogo_molduras.get(nome_da_moldura)
 
-    # HTML Único e Blindado contra erros de indentação e vazamentos
+    # HTML com super dimensionamento para imagens com muita transparência
     if link_moldura:
         st.markdown(
             f"""
             <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
                 <div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;">
+                    
                     <img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;">
-                    <img src="{link_moldura}" style="width: 165px; height: 165px; object-fit: contain; position: absolute; top: -34px; left: -32px; pointer-events: none; z-index: 2;">
+                    
+                    <img src="{link_moldura}" style="width: 240px; height: 240px; object-fit: contain; position: absolute; top: -70px; left: -70px; pointer-events: none; z-index: 2;">
+                    
                 </div>
             </div>
             """,
             unsafe_allow_html=True
         )
     else:
+        # Layout padrão caso não tenha moldura ativada
         st.markdown(
             f"""
             <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
@@ -636,7 +640,7 @@ elif aba_ativa and "Perfil" in aba_ativa:
             </div>
             """,
             unsafe_allow_html=True
-    )
+        )
                   
     # 4. INFORMAÇÕES DO PERFIL
     st.title(f"{nome_exibir} ✨ [👑 DEV]")
