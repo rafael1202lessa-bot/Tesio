@@ -583,9 +583,9 @@ elif aba_ativa == "👤 Perfil":
     )
 
 # --- INFORMAÇÕES DO USUÁRIO ---
-st.title(f"{nome_exibir} ✨ [👑 DEV]")
-st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {cargo}")
-st.write(f"*{bio}*")
+    st.title(f"{nome_exibir} ✨ [👑 DEV]")
+    st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {cargo}")
+    st.write(f"*{bio}*")
     
 # Exibição de Seguidores (se houver no banco)
 seguidores_count = user_atual.get('seguidores', 0)
