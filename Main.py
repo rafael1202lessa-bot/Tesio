@@ -25,7 +25,7 @@ if "logado" not in st.session_state :
 if "user_data" not in st. session_state :
     st. session_state . user_data = None
 if "perfil_visitado"not in st. session_state :
-    st. sedfion_state . perfil_visitado = None
+    st. session_state . perfil_visitado = None
 if "historico_ia" not in st. session_state :
     st. session_state . historico_ia = [ ]
 
