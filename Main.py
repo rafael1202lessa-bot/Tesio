@@ -454,20 +454,14 @@ elif aba_ativa == "💬 Chat EXV":
 # --- 4. ABA SILVER IA ---
 elif aba_ativa == "🧠 Silver IA":
     st.title("🧠 Silver IA")
-    st.write("Olá! Eu sou o **Silver**, seu assistente oficial do Silver Tok v2.")
-    
-    prompt_usuario = st.text_input("O que deseja saber ou pesquisar?", placeholder="Ex: Me dê ideias de vídeos para o meu feed")
-    if st.button("Perguntar ao Silver", use_container_width=True):
-        if prompt_usuario:
-            resposta = responder_ia(prompt_usuario)
-            st.session_state.historico_ia.insert(0, {"pergunta": prompt_usuario, "resposta": resposta})
-            
-    if st.session_state.historico_ia:
-        st.write("---")
-        st.subheader("💬 Histórico de Conversas")
-        for chat in st.session_state.historico_ia:
-            st.info(f"❓ **Você:** {chat['pergunta']}")
-            st.success(f"🤖 **Silver:** {chat['resposta']}")
+    prompt_usuario = st.text_input("O que deseja saber?", placeholder="Ex: Me dê ideias de vídeos para o meu feed")
+    if st.button("Perguntar", use_container_width=True) and prompt_usuario:
+        resposta = responder_ia(prompt_usuario)
+        st.session_state.historico_ia.insert(0, {"pergunta": prompt_usuario, "resposta": resposta})
+        st.rerun()
+    for chat in st.session_state.historico_ia:
+        st.info(f"❓ **Você:** {chat['pergunta']}")
+        st.success(f"🤖 **Silver:** {chat['resposta']}")
 
 # --- 5. ABA LOJA DO SITE ---
 elif aba_ativa == "🛒 Loja do Site":
