@@ -625,6 +625,7 @@ elif aba_ativa and "Perfil" in aba_ativa:
     ])
     
     # --- SUB-ABA 1: INVENTÁRIO ---
+        # --- SUB-ABA 1: INVENTÁRIO (VERSÃO CORRIGIDA) ---
     with sub_aba_inventario:
         if meus_itens_perfil:
             # Filtra itens equipados sem duplicar
@@ -641,23 +642,39 @@ elif aba_ativa and "Perfil" in aba_ativa:
                         if st.button("Desequipar", key=f"d_{it}", use_container_width=True):
                             nl = [x for x in meus_itens_perfil if x != f"[EQUIPADO] {it}"]
                             if it not in nl: nl.append(it)
+                            
+                            # 1. Atualiza no Banco de Dados
                             supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                            
+                            # 2. Força a atualização na memória local para mudar na hora
+                            user_atual["itens_exclusivos"] = nl
+                            st.session_state['user_atual'] = user_atual
+                            st.session_state['usuario'] = user_atual
                             st.rerun()
                     else:
                         if st.button("Equipar", key=f"e_{it}", use_container_width=True):
                             nl = []
                             for x in meus_itens_perfil:
-                                if "Moldura" in x and "[EQUIPADO]" in x:
+                                # Se for outra moldura equipada, desequipa para colocar a nova
+                                if "Moldura" in x and "[EQUIPADO]" in x and "Moldura" in it:
                                     nl.append(x.replace("[EQUIPADO] ", ""))
                                 else:
                                     nl.append(x)
+                                    
                             if it in nl: nl.remove(it)
                             nl.append(f"[EQUIPADO] {it}")
+                            
+                            # 1. Atualiza no Banco de Dados
                             supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+                            
+                            # 2. Força a atualização na memória local para mudar na hora
+                            user_atual["itens_exclusivos"] = nl
+                            st.session_state['user_atual'] = user_atual
+                            st.session_state['usuario'] = user_atual
                             st.rerun()
         else:
             st.info("Inventário vazio.")
-
+            
     # --- SUB-ABA 2: EDITAR PERFIL ---
     with sub_aba_editar:
         st.write("Configurações de edição do perfil aqui...")
