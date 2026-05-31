@@ -637,7 +637,7 @@ with sub_aba_inventario:
             st.write("Configurações de edição do perfil aqui...")
         # (coloque o resto do seu código original de editar aqui dentro)
 
-    with sub_aba_convites:
+      with sub_aba_convites:
         st.write("Área de convites aqui...")
         # (coloque o resto do seu código original de convites aqui dentro)
 
