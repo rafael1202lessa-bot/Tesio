@@ -13,7 +13,7 @@ chave = "sb_publishable_ZWY9Hp6kQrhOzff6xc_DrA_8TlnrqQ_"
 try:
     supabase: Cliente = criar_cliente ( url, chave )
 except Exception as e:
-    rua. erro ( f"Erro crítico de conexão: { str ( e ) } " )
+    st.error ( f"Erro crítico de conexão: { str ( e ) } " )
 st.stop()
 
 # --- ESTADO DE DESENVOLVIMENTO ---
