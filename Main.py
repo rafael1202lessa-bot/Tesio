@@ -615,19 +615,22 @@ elif aba_ativa and "Perfil" in aba_ativa:
             nome_da_moldura = item.replace("[EQUIPADO] ", "")
             link_moldura = catalogo_molduras.get(nome_da_moldura)
 
-    # HTML DINÂMICO: Renderiza a foto com ou sem a moldura
+        # HTML DINÂMICO: Renderiza a foto com a moldura 100% alinhada
     if link_moldura:
         st.markdown(
             f"""
             <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
-                <div style="position: absolute; bottom: -50px; left: 15px; width: 120px; height: 120px;">
-                    <img src="{foto_url}" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; position: absolute; top: 15px; left: 15px; border: 3px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.1);">
-                    <img src="{link_moldura}" style="position: absolute; top: 0; left: 0; width: 120px; height: 120px; pointer-events: none;">
+                <div style="position: absolute; bottom: -50px; left: 20px; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center;">
+                    
+                    <img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; border: 3px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);">
+                    
+                    <img src="{link_moldura}" style="position: absolute; width: 124px; height: 124px; object-fit: contain; pointer-events: none; z-index: 10;">
+                    
                 </div>
             </div>
             """,
             unsafe_allow_html=True
-        )
+    )   
     else:
         # Layout padrão caso não tenha moldura ativada
         st.markdown(
