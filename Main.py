@@ -376,60 +376,30 @@ elif aba_ativa == "🎥 Gravar/Postar":
                             st.rerun()
 
 # --- 3. ABA CHAT EXV ---
-elif aba_ativa == "💬 Chat EXV":
-    st.title("💬 Chat EXV")
-    aba_dm, aba_grp = st.tabs(["🔒 Conversas Privadas (Salas)", "👥 Grupos por Código"])
-    
-    with aba_dm:
-        try:
-            todos_req = supabase.table("perfis_usuarios").select("username, nickname").execute()
-            lista_usuarios = [u for u in todos_req.data if u['username'] != user_atual.get('username')]
-        except: lista_usuarios = []
-        
-        st.subheader("🔒 Suas Salas Privadas Ativas")
-        if lista_usuarios:
-            opcoes_usuarios = {u['username']: f"{u['nickname']} (@{u['username']})" for u in lista_usuarios}
-            usuario_selecionado = st.selectbox("Abrir sala privada com:", list(opcoes_usuarios.keys()), format_func=lambda x: opcoes_usuarios[x])
-            
-            if st.button("🚪 Entrar na Sala Privada", use_container_width=True):
-                st.session_state.sala_privada_atual = obter_id_sala_privada(user_atual.get('username'), usuario_selecionado)
-                st.session_state.codigo_grupo_atual = None
-        
-        if st.session_state.sala_privada_atual:
-            sala_id = st.session_state.sala_privada_atual
-            outro_usuario = sala_id.replace(user_atual.get('username'), "").replace("_", "")
-            
-            st.write("---")
-            st.markdown(f"### 💬 Sala Privada: **@{user_atual.get('username')}** & **@{outro_usuario}**")
-            
-            if sala_id not in st.session_state.chat_privado_salas:
-                st.session_state.chat_privado_salas[sala_id] = []
+    with aba_grp:
+        st.subheader("👥 Grupos por Código")
+        cg1, cg2 = st.columns(2)
+        with cg1:
+            nome_novo_grp = st.text_input("Nome do Grupo:")
+            cod_novo_grp = st.text_input("Código Secreto:", type="password", key="new_grp_cod")
+            if st.button("🏗️ Criar Grupo", use_container_width=True) and nome_novo_grp and cod_novo_grp:
+                st.session_state.chat_grupos[cod_novo_grp] = {"nome": nome_novo_grp, "mensagens": []}
+                st.success("Grupo criado!")
+        with cg2:
+            cod_inserido = st.text_input("Digitar Código:", type="password", key="join_grp_cod")
+            if st.button("🚪 Entrar", use_container_width=True) and cod_inserido in st.session_state.chat_grupos:
+                st.session_state.codigo_grupo_atual = cod_inserido
+                st.session_state.sala_privada_atual = None
                 
-            for msg in st.session_state.chat_privado_salas[sala_id]:
-                with st.chat_message("user" if msg['remetente'] == user_atual.get('username') else "assistant"):
-                    st.markdown(f"**@{msg['remetente']}**")
-                    if msg['tipo'] == 'texto': st.write(msg['conteudo'])
-                    elif msg['tipo'] == 'foto': st.image(msg['conteudo'], caption="Foto enviada", width=250)
-                    elif msg['tipo'] == 'audio': st.audio(msg['conteudo'])
-            
-            st.write("---")
-            tipo_midia = st.radio("O que quer enviar?", ["📝 Mensagem", "🖼️ Link de Foto", "🎵 Link de Áudio"], horizontal=True)
-            
-            if tipo_midia == "📝 Mensagem":
-                txt = st.text_input("Sua mensagem:", key="msg_p_input")
-                if st.button("Enviar Texto", use_container_width=True) and txt:
-                    st.session_state.chat_privado_salas[sala_id].append({"remetente": user_atual.get('username'), "tipo": "texto", "conteudo": txt})
-                    st.rerun()
-            elif tipo_midia == "🖼️ Link de Foto":
-                img_url = st.text_input("URL da Imagem (.jpg, .png):", placeholder="https://exemplo.com/imagem.png")
-                if st.button("Enviar Foto", use_container_width=True) and img_url:
-                    st.session_state.chat_privado_salas[sala_id].append({"remetente": user_atual.get('username'), "tipo": "foto", "conteudo": img_url})
-                    st.rerun()
-            elif tipo_midia == "🎵 Link de Áudio":
-                audio_url = st.text_input("URL do arquivo de áudio (.mp3, .wav):", placeholder="https://exemplo.com/audio.mp3")
-                if st.button("Enviar Áudio", use_container_width=True) and audio_url:
-                    st.session_state.chat_privado_salas[sala_id].append({"remetente": user_atual.get('username'), "tipo": "audio", "conteudo": audio_url})
-                    st.rerun()
+        if st.session_state.codigo_grupo_atual:
+            cod_g = st.session_state.codigo_grupo_atual
+            st.markdown(f"### Grupo: **{st.session_state.chat_grupos[cod_g]['nome']}**")
+            for m_g in st.session_state.chat_grupos[cod_g]['mensagens']: 
+                st.write(f"**@{m_g['remetente']}:** {m_g['conteudo']}")
+            msg_g = st.text_input("Escrever...", key="input_msg_grp")
+            if st.button("Enviar Grupo") and msg_g:
+                st.session_state.chat_grupos[cod_g]['mensagens'].append({"remetente": user_atual.get('username'), "conteudo": msg_g})
+                st.rerun()
                     
             if st.button("❌ Fechar Sala Privada", use_container_width=True):
                 st.session_state.sala_privada_atual = None
