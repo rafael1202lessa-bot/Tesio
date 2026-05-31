@@ -22,11 +22,11 @@ ESTADO_DESENVOLVIMENTO = Verdadeiro
 # --- INICIALIZAÇÃO DA SESSÃO ---
 if "logado" not in st.session_state :
     rua. estado_sessão . logado = Falso
-se  "user_data"  não estiver  em st. session_state :
+if "user_data" not in st. session_state :
     st. session_state . user_data = None
-se  "perfil_visitado"  não estiver  em st. session_state :
+if "perfil_visitado"not in st. session_state :
     rua. estado_sessão . perfil_visitado = Nenhum
-se  "historico_ia"  não estiver  em st. session_state :
+if "historico_ia" not in st. session_state :
     st. session_state . historico_ia = [ ]
 
 # --- BANCO DE DADOS LOCAL DO CHAT E LIVES (Sessão Ativa) ---
