@@ -646,7 +646,7 @@ with sub_aba_inventario:
         # (coloque o resto do seu código original de amigos aqui dentro)
 
 # --- 7. ABA VISITAR PERFIL ALHEIO ---
-elif aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visited:
+if aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visited:
     alvo = st.session_state.perfil_visitado
     try:
         res = supabase.table("perfis_usuarios").select("*").eq("username", alvo).execute()
