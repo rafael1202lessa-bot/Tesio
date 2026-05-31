@@ -567,7 +567,7 @@ elif aba_ativa == "🛒 Loja do Site":
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
                                                                                 # --- SISTEMA DE INVENTÁRIO (CORRIGIDO) ---
-                    supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
+        supabase.table("perfis_usuarios").update({"itens_exclusivos": nl}).eq("username", user_atual.get('username')).execute()
                     st.rerun()
                 else:
                     if st.button("Equipar", key=f"e_{it}", use_container_width=True):
