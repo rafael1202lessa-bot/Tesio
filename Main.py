@@ -607,8 +607,6 @@ elif aba_ativa and "Perfil" in aba_ativa:
         "Moldura Cyberpunk": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/main/moldura_cyber.png"
 }
 
-    }
-
     # Verifica o que está equipado
     link_moldura = None
     for item in meus_itens_perfil:
