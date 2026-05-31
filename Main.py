@@ -598,7 +598,7 @@ elif aba_ativa and "Perfil" in aba_ativa:
     
 
     # ==========================================
-    # --- 3. DESIGN DO BANNER PREMIUM (RECONSTRUTOR) ---
+    # --- 3. DESIGN DO BANNER PREMIUM (PRODUÇÃO) ---
     # ==========================================
     
     # 🎫 CÁTALOGO DE MOLDURAS DO SILVER TOK
@@ -607,27 +607,27 @@ elif aba_ativa and "Perfil" in aba_ativa:
         "Moldura Cyberpunk": "https://cdn.jsdelivr.net/gh/rafael1202lessa-bot/tesio@main/moldura_cyber.png"
     }
 
-    # Força a recuperação segura da sua foto de perfil padrão
+    # Garante de forma segura que a variável da foto exista sem quebrar o app
     if 'foto_url' not in locals() and 'foto_url' not in globals():
         foto_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8qZMmUOxgkcCJpyzdnLeVv-o5IJ3MAIN4R-pn6K5rNuc61y3dfVbGQ5s&s=10"
 
-    # Garante que o inventário seja lido sem quebrar
+    # SISTEMA DINÂMICO: Se 'meus_itens_perfil' não existir na memória, criamos vazio para não quebrar os outros botões do app
     if 'meus_itens_perfil' not in locals() and 'meus_itens_perfil' not in globals():
-        meus_itens_perfil = ["[EQUIPADO] Moldura angelical"]  # Força a moldura ativa por segurança
+        meus_itens_perfil = []
 
-    # Identifica qual moldura renderizar
+    # Identifica dinamicamente se há uma moldura equipada de verdade no inventário
     link_moldura = None
     for item in meus_itens_perfil:
         if "[EQUIPADO]" in item and "Moldura" in item:
             nome_da_moldura = item.replace("[EQUIPADO] ", "")
             link_moldura = catalogo_molduras.get(nome_da_moldura)
 
-    # HTML com injeção direta: reconstrói o banner e centraliza milimetricamente a moldura anjo
+    # HTML definitivo com alinhamento cirúrgico de moldura
     if link_moldura:
         st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><div style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px;"><img src="{foto_url}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0; border: 4px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); z-index: 1;"><img src="{link_moldura}" style="width: 155px; height: 155px; object-fit: contain; position: absolute; top: -29px; left: -28px; pointer-events: none; z-index: 2;"></div></div>', unsafe_allow_html=True)
     else:
-        st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;"><img src="{foto_url}" style="position: absolute; bottom: -40px; left: 20px; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);"></div>', unsafe_allow_html=True)
-    
+        st.markdown(f'<div style="position: relative; width: 100%; height: 180px; background: linear-gradient(13
+        
     # 4. INFORMAÇÕES DO PERFIL
     st.title(f"{nome_exibir} ✨ [👑 DEV]")
     st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {cargo}")
