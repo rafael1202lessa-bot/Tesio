@@ -604,7 +604,7 @@ elif aba_ativa and "Perfil" in aba_ativa:
     catalogo_molduras = {
         "Moldura angelical": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/main/moldura-anjo.png",
         "Moldura de Fogo 🔥": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/main/moldura_fogo.png",
-        "Moldura Cyberpunk": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/main/moldura_cyber.png"
+        "Moldura Cyberpunk": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/master/moldura_cyber.png"
 }
 
     # Verifica o que está equipado
