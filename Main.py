@@ -566,17 +566,38 @@ elif aba_ativa == "🛒 Loja do Site":
                             else: 
                                 st.error("❌ Saldo insuficiente!")
             st.write("---")
- # --- 6. ABA MEU PERFIL ---           
-elif aba_ativa == "👤 Perfil":
-    st.warning("O bloco do perfil foi ativado com sucesso!")
+ # ==========================================
+# --- 6. ABA MEU PERFIL (VERSÃO NOVA) ---
+# ==========================================
+# NOTA: Garanta que "👤 Perfil" esteja escrito IGUALZINHO no seu menu principal!
+elif aba_ativa and "Perfil" in aba_ativa:
     
-    # Valores fixos apenas para testar se o visual renderiza
-    foto_url = "https://via.placeholder.com/150"
-    nome_exibir = "Rafael DEV"
-    cargo = "👑 Administrador / DEV"
-    bio = "Testando o layout do Silver Tok"
+    # 1. GARANTIA DE DADOS (Evita tela branca e NameError)
+    if 'user_atual' not in locals() and 'user_atual' not in globals():
+        user_atual = st.session_state.get('user_atual', st.session_state.get('usuario', {}))
     
-    # Banner
+    if not user_atual:
+        user_atual = {
+            "nickname": "Rafael",
+            "username": "rafael_dev",
+            "cargo": "👑 DEV",
+            "bio": "Configurando o Silver Tok...",
+            "foto_perfil": "https://via.placeholder.com/150",
+            "seguidores": 0,
+            "seguindo": 0,
+            "itens_exclusivos": []
+        }
+
+    # 2. EXTRAÇÃO SEGURA DE VARIÁVEIS
+    foto_url = user_atual.get('foto_perfil') or "https://via.placeholder.com/150"
+    nome_exibir = user_atual.get('nickname') or user_atual.get('username') or "Rafael"
+    cargo = user_atual.get('cargo') or "Membro"
+    bio = user_atual.get('bio') or "Sem bio definida."
+    seguidores_count = user_atual.get('seguidores', 0)
+    seguindo_count = user_atual.get('seguindo', 0)
+    meus_itens_perfil = user_atual.get('itens_exclusivos', []) or []
+
+    # 3. DESIGN DO BANNER PREMIUM
     st.markdown(
         f"""
         <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
@@ -586,33 +607,35 @@ elif aba_ativa == "👤 Perfil":
         unsafe_allow_html=True
     )
 
-    st.title(f"{nome_exibir} ✨")
-    st.caption(f"Cargo: {cargo}")
+    # 4. INFORMAÇÕES DO PERFIL
+    st.title(f"{nome_exibir} ✨ [👑 DEV]")
+    st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {cargo}")
     st.write(f"*{bio}*")
-    st.success("Se você está vendo isso, o topo está funcionando perfeitamente!")
-  
-    # Exibição de Seguidores (Movido para dentro do Perfil)
-    seguidores_count = user_atual.get('seguidores', 0)
-    seguindo_count = user_atual.get('seguindo', 0)
+    
+    # Contadores de Seguidores
     st.markdown(f"**👥 {seguidores_count}** Seguidores │ **👤 {seguindo_count}** Seguindo")
+    st.markdown("---")
 
-    st.write("---")
-
-    # Segurança caso a variável meus_itens_perfil não venha carregada do banco
-    if 'meus_itens_perfil' not in locals() and 'meus_itens_perfil' not in globals():
-        meus_itens_perfil = user_atual.get('itens_exclusivos', []) or []
-
-    # Criando as sub-abas horizontais com o recuo correto
-    sub_aba_inventario, sub_aba_editar, sub_aba_convites, sub_aba_amigos = st.tabs(["🎒 Meu Inventário", "⚙️ Editar Perfil", "✉️ Convites", "👥 Amigos"])
+    # 5. SUB-ABAS DO PERFIL
+    sub_aba_inventario, sub_aba_editar, sub_aba_convites, sub_aba_amigos = st.tabs([
+        "🎒 Meu Inventário", 
+        "⚙️ Editar Perfil", 
+        "✉️ Convites", 
+        "👥 Amigos"
+    ])
     
     # --- SUB-ABA 1: INVENTÁRIO ---
     with sub_aba_inventario:
         if meus_itens_perfil:
+            # Filtra itens equipados sem duplicar
             itens_exib = list(set([i.replace("[EQUIPADO] ", "") for i in meus_itens_perfil if i]))
             for it in itens_exib:
                 col_n, col_a = st.columns([3, 1])
                 eq = f"[EQUIPADO] {it}" in meus_itens_perfil
-                with col_n: st.markdown(f"🟢 **{it}**" if eq else f"⚪ {it}")
+                
+                with col_n: 
+                    st.markdown(f"🟢 **{it}**" if eq else f"⚪ {it}")
+                
                 with col_a:
                     if eq:
                         if st.button("Desequipar", key=f"d_{it}", use_container_width=True):
@@ -635,19 +658,18 @@ elif aba_ativa == "👤 Perfil":
         else:
             st.info("Inventário vazio.")
 
-    # --- SUB-ABA 2: EDITAR PERFIL (Alinhado para fora do Inventário) ---
+    # --- SUB-ABA 2: EDITAR PERFIL ---
     with sub_aba_editar:
         st.write("Configurações de edição do perfil aqui...")
 
-    # --- SUB-ABA 3: CONVITES (Alinhado para fora do Inventário) ---
+    # --- SUB-ABA 3: CONVITES ---
     with sub_aba_convites:
         st.write("Área de convites aqui...")
 
-    # --- SUB-ABA 4: AMIGOS (Alinhado para fora do Inventário) ---
+    # --- SUB-ABA 4: AMIGOS ---
     with sub_aba_amigos:
         st.write("Lista de amigos aqui...")
     
-
 # --- 7. ABA VISITAR PERFIL ALHEIO ---
 if aba_ativa == "👀 Ver Perfil" and st.session_state.perfil_visited:
     alvo = st.session_state.perfil_visitado
