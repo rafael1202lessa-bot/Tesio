@@ -20,7 +20,7 @@ st.stop()
 ESTADO_DESENVOLVIMENTO = Verdadeiro 
 
 # --- INICIALIZAÇÃO DA SESSÃO ---
-se  "logado"  não estiver  em st. session_state :
+if "logado" not in st.session_state :
     rua. estado_sessão . logado = Falso
 se  "user_data"  não estiver  em st. session_state :
     st. session_state . user_data = None
