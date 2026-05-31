@@ -14,7 +14,7 @@ try:
     supabase: client = create_client ( url, chave )
 except Exception as e:
     st.error ( f"Erro crítico de conexão: { str ( e ) } " )
-st.stop()
+# st.stop()
 
 # --- ESTADO DE DESENVOLVIMENTO ---
 ESTADO_DESENVOLVIMENTO = Verdadeiro 
