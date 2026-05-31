@@ -597,38 +597,39 @@ elif aba_ativa and "Perfil" in aba_ativa:
     seguindo_count = user_atual.get('seguindo', 0)
     meus_itens_perfil = user_atual.get('itens_exclusivos', []) or []
 
-    # 3. DESIGN DO BANNER PREMIUM (SISTEMA DINÂMICO DE MOLDURAS)
+    # ==========================================
+    # --- 3. DESIGN DO BANNER PREMIUM (SISTEMA LOCAL) ---
+    # ==========================================
     
     # 🎫 CÁTALOGO DE MOLDURAS DO SILVER TOK
-    # Quando criar uma moldura nova, basta adicionar ela aqui embaixo!
+    # Como as imagens estão na mesma pasta do main.py, usamos apenas o nome do arquivo!
     catalogo_molduras = {
-        "Moldura angelical": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/main/moldura-anjo.png",
-        "Moldura de Fogo 🔥": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/main/moldura_fogo.png",
-        "Moldura Cyberpunk": "https://raw.githubusercontent.com/rafael1202lessa-b/tesio/master/moldura_cyber.png"
-}
+        "Moldura angelical": "moldura-anjo.png",
+        "Moldura Cyberpunk": "moldura_cyber.png"
+    }
 
-    # Verifica o que está equipado
-    link_moldura = None
+    # Verifica se o usuário tem alguma moldura equipada
+    imagem_moldura = None
     for item in meus_itens_perfil:
         if "[EQUIPADO]" in item and "Moldura" in item:
             nome_da_moldura = item.replace("[EQUIPADO] ", "")
-            # O código busca automaticamente o link correto no seu catálogo!
-            link_moldura = catalogo_molduras.get(nome_da_moldura)
+            imagem_moldura = catalogo_molduras.get(nome_da_moldura)
 
-    # HTML ÚNICO: Ele se adapta sozinho se tiver ou não moldura
-    if link_moldura:
+    # HTML DINÂMICO: Renderiza a foto com ou sem a moldura local
+    if imagem_moldura:
         st.markdown(
             f"""
             <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
                 <div style="position: absolute; bottom: -50px; left: 15px; width: 120px; height: 120px;">
                     <img src="{foto_url}" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; position: absolute; top: 15px; left: 15px; border: 3px solid #fff; box-shadow: 0px 4px 10px rgba(0,0,0,0.1);">
-                    <img src="{link_moldura}" style="position: absolute; top: 0; left: 0; width: 120px; height: 120px; pointer-events: none;">
+                    <img src="{imagem_moldura}" style="position: absolute; top: 0; left: 0; width: 120px; height: 120px; pointer-events: none;">
                 </div>
             </div>
             """,
             unsafe_allow_html=True
         )
     else:
+        # Layout padrão caso não tenha moldura ativada
         st.markdown(
             f"""
             <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px; margin-bottom: 50px;">
@@ -637,7 +638,7 @@ elif aba_ativa and "Perfil" in aba_ativa:
             """,
             unsafe_allow_html=True
         )
-        
+          
     # 4. INFORMAÇÕES DO PERFIL
     st.title(f"{nome_exibir} ✨ [👑 DEV]")
     st.caption(f"@{user_atual.get('username', 'usuario')} | Cargo: {cargo}")
