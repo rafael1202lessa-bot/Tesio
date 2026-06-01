@@ -360,61 +360,7 @@ if aba_ativa == "📱 Feed":
                             st.error(f"Erro ao apagar: {str(err)}")
                             st.write("---")
                          
-# --- 2. ABA GRAVAR/POSTAR (ESTÚDIO COM CENTRAL DA LIVE + LIVE PIX TTS) ---
-elif aba_ativa == "🎥 Gravar/Postar":
-    st.title("🎥 Estúdio de Criação & Live")
-    
-    # Criando as abas organizadas com as funcionalidades completas
-    aba_upload, aba_link, aba_live = st.tabs([
-        "📁 Enviar Vídeo Gravado", 
-        "🔗 Postar por Link", 
-        "🔴 Central do Streamer (Sua Live)"
-    ])
-    
-    # ----------------------------------------------------------
-    # 📁 ABA 1: UPLOAD REAL DE VÍDEO (Persistido no Supabase Storage)
-    # ----------------------------------------------------------
-    with aba_upload:
-        st.subheader("📁 Enviar Vídeo da Galeria")
-        legenda_upload = st.text_input("Legenda do post:", key="leg_upload")
-        arquivo_video = st.file_uploader("Selecione um arquivo de vídeo (.mp4, .mov, .avi):", type=["mp4", "mov", "avi"])
-        
-        if st.button("🚀 Publicar Vídeo da Galeria", use_container_width=True):
-            if arquivo_video is not None:
-                try:
-                    with st.spinner("Enviando o vídeo para o servidor... Aguarde. ⏳"):
-                        # Define um nome único baseado no usuário e arquivo
-                        nome_do_arquivo = f"{user_atual.get('username')}_{arquivo_video.name}"
-                        dados_do_video = arquivo_video.read()
-                        
-                        # Upload para o Bucket "videos_feed"
-                        supabase.storage.from_("videos_feed").upload(
-                            path=nome_do_arquivo, 
-                            file=dados_do_video, 
-                            file_options={"content-type": "video/mp4"}
-                        )
-                        
-                        # Pega a URL pública gerada
-                        url_publica = supabase.storage.from_("videos_feed").get_public_url(nome_do_arquivo)
-                        
-                        # Insere o registro na tabela de feed
-                        supabase.table("feed_videos").insert({
-                            "usuario": user_atual.get('username'), 
-                            "video_url": url_publica, 
-                            "legenda": legenda_upload.strip(),
-                            "curtidas": 0,
-                            "visualizacoes": 0
-                        }).execute()
-                        
-                        st.success("Vídeo publicado com sucesso no Feed! 🎉")
-                        st.rerun()
-                except Exception as e:
-                    st.error(f"Erro ao fazer upload: {str(e)}")
-            else:
-                st.warning("Por favor, selecione um arquivo de vídeo antes de publicar.")
-
-    # ----------------------------------------------------------
-    # 🔗 ABA 2: POSTAR POR LINK DIRETO
+ DIRETO
     # ----------------------------------------------------------
     with aba_link:
         st.subheader("🔗 Publicar Vídeo por URL externa")
@@ -500,30 +446,109 @@ elif aba_ativa == "🎥 Gravar/Postar":
                     for msg_l in st.session_state.live_chat: 
                         st.write(f"**@{msg_l['remetente']}:** {msg_l['conteudo']}")
                 
-                # Simulador Interativo Dev para Testar Alertas e Chat
-                st.write("---")
-                st.caption("🧪 Simulador de Público (Modo Dev)")
-                sim_user = st.text_input("Usuário do fã:", value="seguidor_vip_01", key="sim_u")
-                sim_txt = st.text_input("Mensagem do Chat:", placeholder="Manda salve Rafa!", key="sim_t")
+# --- 2. ABA GRAVAR / POSTAR ---
+    
+if aba_ativa == "🎥 Gravar/Postar":
+    st.title("🎥 Postar Novo Conteúdo")
+    
+    aba_link, aba_central, aba_upload = st.tabs(["🔗 Postar por Link"])
+    legenda_link = st.text_input("Legenda do post:", key="leg_link")
+    url_link = st.text_input("Link do vídeo (.mp4):", key="url_link")
+        
+if st.button("Publicar Vídeo por Link", use_container_width=True):
+    if url_link.strip():
+                try:
+                    supabase.table("feed_videos").insert({
+                        "usuario": user_atual.get('username'),
+                        "video_url": url_link.strip(),
+                        "legenda": legenda_link.strip(),
+                        "curtidas": 0,
+                        "visualizacoes": 0
+                    }).execute()
+                    st.success("Vídeo publicado com sucesso!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Erro ao salvar: {str(e)}")
+                if url_link:    
+                else:
+            st.warning("Por favor, insira o link do vídeo.")  # <--- Dê um Tab aqui!
+            
+    with aba_central:
+        st.subheader("📹 Painel de Controle de Transmissão")
+        
+        # Garante que a variável exista no session_state para não quebrar
+        if 'live_ativa' not in st.session_state:
+            st.session_state.live_ativa = False
+
+        if not st.session_state.live_ativa:
+            titulo_live = st.text_input("Título da sua Live:", placeholder="Ex: Programando o Silver Tok v2! 🔥")
+            if st.button("🔴 INICIAR LIVE GLOBAL", use_container_width=True):
+                if titulo_live:
+                    try:
+                        supabase.table("lives_ativas").delete().eq("streamer_username", user_atual.get('username')).execute()
+                        supabase.table("lives_ativas").insert({
+                            "streamer_username": user_atual.get('username'), 
+                            "streamer_nickname": user_atual.get('nickname'), 
+                            "titulo_live": titulo_live, 
+                            "status": "online"
+                        }).execute()
+                        st.session_state.live_ativa = True
+                        st.session_state.live_chat = [{"remetente": "Sistema", "conteudo": "Sua transmissão está pública no feed!"}]
+                        st.rerun()
+                    except Exception as e: 
+                        st.error(f"Erro ao abrir transmissão: {str(e)}")
+                else:
+                    st.warning("Por favor, insira um título para a sua live.")
+        else:
+            st.success("🎥 VOCÊ ESTÁ AO VIVO!")
+            if st.button("⏹️ Encerrar Transmissão", use_container_width=True):
+                st.session_state.live_ativa = False
+                try: 
+                    supabase.table("lives_ativas").delete().eq("streamer_username", user_atual.get('username')).execute()
+                except: 
+                    pass
+                st.rerun()
+            
+            st.write("---")
+            col_video_retorno, col_chat_live = st.columns([4, 3])
+            
+            with col_video_retorno:
+                st.markdown("### 🖥️ Retorno de Vídeo")
+                st.camera_input("Monitor", key="monitor_live_cam")
                 
-                c_b1, c_b2 = st.columns(2)
-                with c_b1:
-                    if st.button("💬 Simular Mensagem", use_container_width=True):
-                        if sim_txt:
-                            st.session_state.live_chat.append({"remetente": sim_user, "conteudo": sim_txt})
-                            st.rerun()
-                with c_b2:
-                    sim_coins = st.number_input("Moedas:", min_value=10, value=50, step=10)
-                    if st.button("🎁 Simular Silver Coins", use_container_width=True):
-                        if sim_txt:
-                            texto_completo_alerta = f"Enviou {sim_coins} Silver Coins! Mensagem: {sim_txt}"
-                            st.session_state.live_chat.append({"remetente": sim_user, "conteudo": f"⭐ {texto_completo_alerta}"})
-                            st.session_state.live_alertas.append({"usuario": sim_user, "moedas": sim_coins, "msg": sim_txt})
-                            
-                            # Dispara a função tts nativa do seu app para ler o alerta
-                            texto_leitura = f"{sim_user} enviou {sim_coins} Silver Coins. {sim_txt}"
-                            emitir_alerta_voz(texto_leitura)
-                            st.rerun()
+            with col_chat_live:
+                st.markdown("### 💬 Chat da Live")
+                with st.container(border=True, height=200):
+                    if 'live_chat' in st.session_state:
+                        for msg_l in st.session_state.live_chat: 
+                            st.write(f"**@{msg_l['remetente']}:** {msg_l['conteudo']}")
+
+    with aba_upload:
+        st.subheader("📁 Enviar Vídeo da Galeria")
+        legenda_upload = st.text_input("Legenda do post:", key="leg_upload")
+        arquivo_video = st.file_uploader("Selecione um arquivo de vídeo (.mp4):", type=["mp4", "mov", "avi"])
+        
+        if st.button("Publicar Vídeo da Galeria", use_container_width=True):
+            if arquivo_video is not None:
+                try:
+                    with st.spinner("Enviando o vídeo... Aguarde. ⏳"):
+                        nome_do_arquivo = f"{user_atual.get('username')}_{arquivo_video.name}"
+                        dados_do_video = arquivo_video.read()
+                        supabase.storage.from_("videos_feed").upload(path=nome_do_arquivo, file=dados_do_video, file_options={"content-type": "video/mp4"})
+                        url_publica = supabase.storage.from_("videos_feed").get_public_url(nome_do_arquivo)
+                        supabase.table("feed_videos").insert({
+                            "usuario": user_atual.get('username'), 
+                            "video_url": url_publica, 
+                            "legenda": legenda_upload,
+                            "curtidas": 0,
+                            "visualizacoes": 0
+                        }).execute()
+                        st.success("Vídeo publicado com sucesso! 🎉")
+                        st.rerun()
+                except Exception as e:
+                    st.error(f"Erro ao fazer upload: {str(e)}")
+            else:
+                st.warning("Por favor, selecione um arquivo de vídeo antes de publicar.")
 
 # --- 3. ABA CHAT EXV ---
 elif aba_ativa == "💬 Chat EXV":
