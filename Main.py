@@ -385,7 +385,7 @@ if st.button("Publicar Vídeo por Link", use_container_width=True):
                     st.error(f"Erro ao salvar: {str(e)}")
                 if url_link:
                     
-        else: 
+            else: 
             st.warning("Por favor, insira o link do vídeo.")  # <--- Dê um Tab aqui!
             
     with aba_central:
